@@ -26,6 +26,8 @@
 *.tar
 *.zip
 *.txt
+*.mp3
+*.TXT
 
 # Logs and databases #
 ######################
