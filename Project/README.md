@@ -17,16 +17,20 @@ Welcome to Tony's project information page!
 * Output: user tunable variable length texts by the end of the *live* meeting
 * Back-end: python
 
-
 * MVP: Record live conversation, return a few keywords.
 * Full product: Record live conversation, return comprehensible sentences.
 * Further: Use audio characteristics to catch questions, change of volume and tone to help NLP recognition.
 
 
-## List of Todo's For Jun 7, 2018
+## List of Todo's For Jun 8, 2018
 
-* Get a live recording processed working -- DONE; not automatic/fancy yet but done
-* Get some small NLP working 
-* Get one-pipeline tested
-* Get more training data sorted -- at least 100; New concept English! How I learned English
-* Make presentation
+* Add in a google API option for speech recognition.
+* Add Ted talks -- NCE is too far away from this audience.
+
+
+## Open Questions
+
+* Deal with multi-speaker
+* Deal with many topics, how granular are the summaries
+* Identify important parts of the conversation / meeting
+* Combination with fixed agenda
