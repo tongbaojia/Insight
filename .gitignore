@@ -28,6 +28,7 @@
 *.txt
 *.mp3
 *.TXT
+*.story
 
 # Logs and databases #
 ######################

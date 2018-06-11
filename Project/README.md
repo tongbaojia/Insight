@@ -22,10 +22,18 @@ Welcome to Tony's project information page!
 * Further: Use audio characteristics to catch questions, change of volume and tone to help NLP recognition.
 
 
-## List of Todo's For Jun 8, 2018
+## List of Todo's For Jun 12, 2018
 
-* Add in a google API option for speech recognition.
-* Add Ted talks -- NCE is too far away from this audience.
+* Add in a google API option for speech recognition. -- Added; but needs internet.
+* Add Ted talks -- NCE is too far away from this audience. (NPR added.)
+* Serious NLP?/ Performance score? ROUGE.
+* Data exploration? CNN data.
+* Train on some text recongnition and then test on recognised speech? Yes.
+* Demo suggestion? Flask? 
+* Keyword summary/Headline summary/Informative summary/Indicative summary
+
+* Format the CNN text input to x and Y
+* Text to text summarization templates running and ready
 
 
 ## Open Questions
