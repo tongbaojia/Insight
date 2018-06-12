@@ -29,6 +29,7 @@
 *.mp3
 *.TXT
 *.story
+*.json
 
 # Logs and databases #
 ######################
