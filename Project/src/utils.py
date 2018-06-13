@@ -1,6 +1,6 @@
 ## for speech to text
 import speech_recognition as sr
-
+import nltk
 
 def SoundToText(file="", useGoogle=False):
     '''Uses Sphinx builtin. 
@@ -33,6 +33,41 @@ def SoundToText(file="", useGoogle=False):
         print('STH is wrong!')
         return ""
     
+def text_clean(in_text):
+    '''clean and remove some common words'''
+    tokenizer = nltk.tokenize.RegexpTokenizer('\w+')
+    
+    # Tokenizing the text
+    tokens = tokenizer.tokenize(in_text)
+    # A new list to hold the lowercased words
+    words = []
+    for word in tokens:
+        words.append(word.lower())
+        
+    # Getting the English stop words from nltk
+    sw = nltk.corpus.stopwords.words('english')
+    
+    # A new list with No Stop words
+    words_ns = []
+
+    # Appending to words_ns all words that are in words but not in sw
+    for word in words:
+        if word not in sw:
+            words_ns.append(word)
+    # Creating the word frequency distribution
+    freqdist = nltk.probability.FreqDist(words_ns)
+
+    # # Plotting the word frequency distribution
+    # plt.clf()
+    # fig=plt.figure(figsize=(6, 4))
+    # plt.subplots_adjust(bottom=0.3)
+    # freqdist.plot(10)
+    # fig.savefig("Plot/word_freq.pdf", format="pdf")    
+    # print(freqdist.most_common(5))
+    
+    return freqdist.most_common(5)
+    # out_text = " ".join(str(x) for x in words_ns)
+    # return out_text
 
 
 def wer(ref, hyp ,debug=False):

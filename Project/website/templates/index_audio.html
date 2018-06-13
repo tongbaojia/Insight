@@ -207,5 +207,20 @@
           return false;
       });
     </script>
+
+    <div class="form-container jumbotron" id-"sum-section">
+      <form action = "#" id="mytext" method = "POST">
+        <input type="submit" value="Translates">
+        <h4>summazrized Text: </h4>
+        <textbox name="output_text" id="output_text" maxlength="50000" style="width:600px; height:250px">
+          {% for sentence in output_summary %}
+          <p>{{ sentence }} </p>
+          {% endfor %}
+        </textbox>
+        <br>
+        <h4>Original Text:</h4>
+        <p>{{ original_text }}</p>
+      </form>
+    </div>
 </body>
 </html>

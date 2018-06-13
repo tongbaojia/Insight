@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+import sys
+sys.path.insert(0, '../src/')
+
 #from threading import Lock
 from flask import Flask, render_template, session, request
 from flask_socketio import SocketIO, emit, disconnect#, join_room, leave_room, close_room, rooms
@@ -6,7 +9,8 @@ from flask_socketio import SocketIO, emit, disconnect#, join_room, leave_room, c
 import scipy.io.wavfile
 import numpy as np
 from collections import OrderedDict
-import sys
+from utils import SoundToText
+from utils import text_clean
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
@@ -107,7 +111,7 @@ def test_connect():
     #    if thread is None:
     #        thread = socketio.start_background_task(target=background_thread)
     session['audio'] = []
-    emit('my_response', {'data': 'Connected', 'count': 0})
+    emit('my_response', {'data': 'Recording', 'count': 0})
 
 @socketio.on('sample_rate', namespace='/test')
 def handle_my_sample_rate(sampleRate):
@@ -135,10 +139,21 @@ def test_disconnect():
     sindata = np.sin(my_audio)
     scaled = np.round(32767*sindata)
     newdata = scaled.astype(np.int16)
-    scipy.io.wavfile.write('out.wav', sample_rate, newdata)
+    scipy.io.wavfile.write('tmp/out.wav', sample_rate, newdata)
 
     session['audio'] = []
-    print('Client disconnected', request.sid)
+    print('Audio recording finished', request.sid)
+
+
+@socketio.on('mytext', namespace='/test')
+@app.route('/audio', methods=['POST'])
+def mytext(name=None):
+    mytextdic = SoundToText('tmp/out.wav')
+    atext = ""
+    for i in range(len(mytextdic.keys())):
+        atext += mytextdic['tmp/out.wav']
+    keytext = text_clean(atext)
+    return render_template("index_audio.html", output_summary = keytext, original_text = atext)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
