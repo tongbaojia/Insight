@@ -1,16 +1,20 @@
 #!/usr/bin/env python
+
+## http://flask.pocoo.org/docs/1.0/quickstart/
 import sys
 sys.path.insert(0, '../src/')
-
+import os
 #from threading import Lock
-from flask import Flask, render_template, session, request
+from flask import Flask, render_template, session, request, flash, redirect, url_for
 from flask_socketio import SocketIO, emit, disconnect#, join_room, leave_room, close_room, rooms
+from werkzeug.utils import secure_filename
 
 import scipy.io.wavfile
 import numpy as np
 from collections import OrderedDict
 from utils import SoundToText
 from utils import text_clean
+from utils import top_words
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
@@ -24,6 +28,8 @@ socketio = SocketIO(app, binary=True)
 #thread = None
 #thread_lock = Lock()
 
+UPLOAD_FOLDER = 'tmp/'
+ALLOWED_EXTENSIONS = set(['txt', 'wav', 'mp3'])
 
 #def background_thread():
 #    """Example of how to send server generated events to clients."""
@@ -48,60 +54,12 @@ def test_message(message):
          {'data': message['data'], 'count': session['receive_count']})
 
 
-#@socketio.on('my_broadcast_event', namespace='/test')
-#def test_broadcast_message(message):
-#    session['receive_count'] = session.get('receive_count', 0) + 1
-#    emit('my_response',
-#         {'data': message['data'], 'count': session['receive_count']},
-#         broadcast=True)
-
-
-#@socketio.on('join', namespace='/test')
-#def join(message):
-#    join_room(message['room'])
-#    session['receive_count'] = session.get('receive_count', 0) + 1
-#    emit('my_response',
-#         {'data': 'In rooms: ' + ', '.join(rooms()),
-#          'count': session['receive_count']})
-
-
-#@socketio.on('leave', namespace='/test')
-#def leave(message):
-#    leave_room(message['room'])
-#    session['receive_count'] = session.get('receive_count', 0) + 1
-#    emit('my_response',
-#         {'data': 'In rooms: ' + ', '.join(rooms()),
-#          'count': session['receive_count']})
-
-
-#@socketio.on('close_room', namespace='/test')
-#def close(message):
-#    session['receive_count'] = session.get('receive_count', 0) + 1
-#    emit('my_response', {'data': 'Room ' + message['room'] + ' is closing.',
-#                         'count': session['receive_count']},
-#         room=message['room'])
-#    close_room(message['room'])
-
-
-#@socketio.on('my_room_event', namespace='/test')
-#def send_room_message(message):
-#    session['receive_count'] = session.get('receive_count', 0) + 1
-#    emit('my_response',
-#         {'data': message['data'], 'count': session['receive_count']},
-#         room=message['room'])
-
-
 @socketio.on('disconnect_request', namespace='/test')
 def disconnect_request():
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
          {'data': 'Disconnected!', 'count': session['receive_count']})
     disconnect()
-
-
-#@socketio.on('my_ping', namespace='/test')
-#def ping_pong():
-#    emit('my_pong')
 
 
 @socketio.on('connect', namespace='/test')
@@ -129,8 +87,8 @@ def handle_my_custom_event(audio):
 
 @socketio.on('disconnect', namespace='/test')
 def test_disconnect():
-    #my_audio = np.array(session['audio'], np.float32)
-    #scipy.io.wavfile.write('out.wav', 44100, my_audio.view('int16'))
+    # my_audio = np.array(session['audio'], np.float32)
+    # scipy.io.wavfile.write('tmp/out.wav', 44100, my_audio.view('int16'))
     #print(my_audio.view('int16'))
 
     # https://stackoverflow.com/a/18644461/466693
@@ -144,15 +102,56 @@ def test_disconnect():
     session['audio'] = []
     print('Audio recording finished', request.sid)
 
+## uploading files
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-@socketio.on('mytext', namespace='/test')
+# def allowed_file(filename):
+#     return '.' in filename and \
+#            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# @app.route('/audio', methods=['GET', 'POST'])
+# def upload_file():
+#     if request.method == 'POST':
+#         # check if the post request has the file part
+#         if 'file' not in request.files:
+#             flash('No file part')
+#             return redirect(request.url)
+#         file = request.files['file']
+#         # if user does not select file, browser also
+#         # submit an empty part without filename
+#         if file.filename == '':
+#             flash('No selected file')
+#             return redirect(request.url)
+#         if file and allowed_file(file.filename):
+#             filename = secure_filename(file.filename)
+#             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+#             return redirect(url_for('upload_file',
+#                                     filename=filename))
+#         else:
+#             flash('No selected file')
+#             return redirect(request.url)
+#     return render_template('index_upload.html')
+
 @app.route('/audio', methods=['POST'])
+@socketio.on('mytext', namespace='/test')
 def mytext(name=None):
-    mytextdic = SoundToText('tmp/out.wav')
+
+    myaudio = ""
+    if request.method == 'POST':
+        if 'TestSample' in request.form:
+            myaudio = 'tmp/chunk_s2.wav'
+        else:
+            myaudio = 'tmp/out.wav'
+    mytextdic = SoundToText(myaudio)
     atext = ""
+
     for i in range(len(mytextdic.keys())):
-        atext += mytextdic['tmp/out.wav']
-    keytext = text_clean(atext)
+        atext += mytextdic[myaudio]
+    
+    keytext = top_words(text_clean(atext))
+
+    for j in keytext:
+        atext = atext.replace(j, "<span style='background-color: #FFFF00'>" + j + "</span>")
     return render_template("index_audio.html", output_summary = keytext, original_text = atext)
 
 if __name__ == '__main__':

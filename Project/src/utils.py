@@ -1,6 +1,7 @@
 ## for speech to text
 import speech_recognition as sr
-import nltk
+import string, re, spacy
+from collections import Counter
 
 def SoundToText(file="", useGoogle=False):
     '''Uses Sphinx builtin. 
@@ -33,41 +34,76 @@ def SoundToText(file="", useGoogle=False):
         print('STH is wrong!')
         return ""
     
-def text_clean(in_text):
+def text_clean(input_text):
     '''clean and remove some common words'''
-    tokenizer = nltk.tokenize.RegexpTokenizer('\w+')
+    table = str.maketrans('', '', string.punctuation)
+    # get rid of punctuation
+    output_text = input_text.translate(table)
     
-    # Tokenizing the text
-    tokens = tokenizer.tokenize(in_text)
-    # A new list to hold the lowercased words
-    words = []
-    for word in tokens:
-        words.append(word.lower())
+    # get rid of newlines
+    output_text = output_text.strip().replace("\n", " ").replace("\r", " ")
+    
+    # replace twitter @mentions
+    mentionFinder = re.compile(r"@[a-z0-9_]{1,15}", re.IGNORECASE)
+    output_text = mentionFinder.sub("@MENTION", output_text)
+    
+    # replace HTML symbols
+    output_text = output_text.replace("&amp;", "and").replace("&gt;", ">").replace("&lt;", "<")
+
+    return output_text
+
+
+def top_words(input_data, keeptype=["NOUN", "PROPN", "NUM", "ADJ", "ADV"], doalpha=True, dostop=True, nwords=5):
+    # List of symbols we don't care about
+    nlp = spacy.load('en')
+    data = nlp("".join(input_data))
+    SYMBOLS = " ".join(string.punctuation).split(" ") + ["-----", "---", "...", "“", "”", "'ve", "\n", "", " ", "\n\n", "npr"]
+    tokens = []
+    for tok in data:
         
-    # Getting the English stop words from nltk
-    sw = nltk.corpus.stopwords.words('english')
+        # stoplist the tokens
+        if dostop:
+            ##check if the token is stopword
+            if not tok.is_stop:
+                pass
+            else:
+                continue
+        else:
+            pass
+        
+        # stoplist symbols
+        if tok.text not in SYMBOLS:
+            pass
+        else: 
+            continue
+        
+        ##check if the token is alpha
+        if doalpha:
+            if tok.is_alpha:
+                pass
+            else:
+                continue
+        else:
+            pass
+        
+        ##check if the token is noun
+        if len(keeptype) > 1:
+            if tok.pos_ in keeptype:
+                pass
+            else:
+                continue
+        else:
+            pass
     
-    # A new list with No Stop words
-    words_ns = []
-
-    # Appending to words_ns all words that are in words but not in sw
-    for word in words:
-        if word not in sw:
-            words_ns.append(word)
-    # Creating the word frequency distribution
-    freqdist = nltk.probability.FreqDist(words_ns)
-
-    # # Plotting the word frequency distribution
-    # plt.clf()
-    # fig=plt.figure(figsize=(6, 4))
-    # plt.subplots_adjust(bottom=0.3)
-    # freqdist.plot(10)
-    # fig.savefig("Plot/word_freq.pdf", format="pdf")    
-    # print(freqdist.most_common(5))
+        # lemmatize
+        if tok.lemma_ != "-PRON-" :
+            tokens.append(tok.lemma_.lower().strip())
+        else:
+            tokens.append(tok.lower_)
     
-    return freqdist.most_common(5)
-    # out_text = " ".join(str(x) for x in words_ns)
-    # return out_text
+    common_words = [w[0] for w in Counter(tokens).most_common(nwords)]
+    # remove large strings of whitespace
+    return common_words
 
 
 def wer(ref, hyp ,debug=False):
