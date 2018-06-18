@@ -91,7 +91,7 @@
                 // navigator.getUserMedia({audio: true}, initializeRecorder, function(a, b, c){
                 //   console.log(a, b, c);
                 // });
-                navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
                 var constraints = { audio: true, video: false }; 
                 navigator.mediaDevices.getUserMedia(constraints)
                 .then(initializeRecorder)
@@ -141,9 +141,6 @@
       </ul>
     </div>
   </div>
-
-
-  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 </body>
 
 </html>
