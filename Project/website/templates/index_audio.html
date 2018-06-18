@@ -80,9 +80,15 @@
             socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
             socket.on('connect', function() {
                 socket.emit('my_event', {data: 'I\'m connected!'});
-                navigator.getUserMedia({audio: true}, initializeRecorder, function(a, b, c){
-                  console.log(a, b, c);
-                });
+                
+                // navigator.getUserMedia({audio: true}, initializeRecorder, function(a, b, c){
+                //   console.log(a, b, c);
+                // });
+
+                var constraints = { audio: true, video: false }; 
+                navigator.mediaDevices.getUserMedia(constraints)
+                .then(initializeRecorder)
+                .catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
             });
             socket.on('my_response', function(msg) {
                 $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
