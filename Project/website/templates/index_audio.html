@@ -38,6 +38,13 @@
       // audio functions
       function initializeRecorder(stream){
          // https://stackoverflow.com/a/42360902/466693
+
+         // doesn't work
+         // if (window.webkitURL) {
+         //     mediaStream = window.webkitURL.createObjectURL(stream);
+         // } else {
+         //     mediaStream = stream;
+         // }
          mediaStream = stream;
 
          // get sample rate
@@ -84,7 +91,7 @@
                 // navigator.getUserMedia({audio: true}, initializeRecorder, function(a, b, c){
                 //   console.log(a, b, c);
                 // });
-
+                navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
                 var constraints = { audio: true, video: false }; 
                 navigator.mediaDevices.getUserMedia(constraints)
                 .then(initializeRecorder)
@@ -134,6 +141,9 @@
       </ul>
     </div>
   </div>
+
+
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 </body>
 
 </html>
