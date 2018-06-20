@@ -30,6 +30,7 @@
 *.TXT
 *.story
 *.json
+*.pem
 
 # Logs and databases #
 ######################
