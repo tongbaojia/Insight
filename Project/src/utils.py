@@ -1,20 +1,85 @@
 ## for speech to text
 import speech_recognition as sr
 import string, re, spacy
+from pydub import AudioSegment ##for audio spliting
+from pydub.silence import split_on_silence
 from collections import Counter
+
+def PrepareSound(file="", fixsplit=False, silencesplit=True):
+    '''input is a file path; can be mp3 or wav; 
+        will recognise file; 
+        then has the option to split the file or not;
+        output is a wav file, or splitted wav files;
+        with a dictionary of each wav file's information.'''
+    if "wav" in file:
+        sound_file = AudioSegment.from_wav(file)
+    if "mp3" in file:
+        sound_file = AudioSegment.from_mp3(file)
+    
+    info = {}
+    def getinfo(schunk):
+        return {"dBFS": schunk.dBFS, 
+                "max_dBFS": schunk.max_dBFS, 
+                "duration": schunk.duration_seconds, 
+                "rms": schunk.rms, 
+                "max": schunk.max}
+    
+    if "mp3" in file:
+        file = file.replace("mp3", "wav")
+        if (not fixsplit) and (not silencesplit):
+            print("convert mp3!")
+            sound_file.export(file, format="wav")
+    
+    ##always keep the whole file info
+    info[file] = getinfo(sound_file)
+        
+    if fixsplit:
+        ##split into 20 second chunks
+        for i, chunk in enumerate(sound_file[::20 * 1000]):
+            out_file = file.replace(".wav", "_" + str(i) + ".wav")
+            with open(out_file, "wb") as f:
+                chunk.export(f, format="wav")
+            info[out_file] = getinfo(chunk)
+        print("fix split!")
+    elif silencesplit:
+        ## https://github.com/jiaaro/pydub/blob/master/pydub/silence.py
+        audio_chunks = split_on_silence(sound_file, 
+            # must be silent for at least half a second; in ms
+            min_silence_len=500,
+            # keep a part of silence so there is no cutoff ; in ms                           
+            keep_silence=250,
+            # seek_step ; in ms                           
+            seek_step=20,
+            # consider it silent; roughly this is 10dB, intensity 1/10 of the ave
+            silence_thresh= (sound_file.dBFS * 1.5 - sound_file.max_dBFS/2))
+        for i, chunk in enumerate(audio_chunks):
+            out_file = file.replace(".wav", "_" + str(i) + ".wav")
+            chunk.export(out_file, format="wav")
+            info[out_file] = getinfo(chunk)
+        #print("silent split!")
+    
+    del sound_file
+    return info
+
 
 def SoundToText(file="", useGoogle=False):
     '''Uses Sphinx builtin. 
-    Input is a dic contained as config'''
+    Input is a dic contained as config.
+    Output is a dic with filename as key and text as content '''
     if file != "":
         #print(file)
         test = sr.AudioFile(file)
         Recon  = sr.Recognizer()
         with test as source:
             test_au = Recon.record(source)
+            ## test_length = test.DURATION
             
         if not useGoogle:
-            text = Recon.recognize_sphinx(test_au, language='en-US')
+            try: 
+                text = Recon.recognize_sphinx(test_au, language='en-US')
+            except UnknownValueError:
+                print("cannot recognize ", file)
+                text = ""
         else:
             ## google API requires internet connection
             ## https://cloud.google.com/speech-to-text/
