@@ -77,7 +77,7 @@ def SoundToText(file="", useGoogle=False):
         if not useGoogle:
             try: 
                 text = Recon.recognize_sphinx(test_au, language='en-US')
-            except UnknownValueError:
+            except sr.UnknownValueError:
                 print("cannot recognize ", file)
                 text = ""
         else:
