@@ -4,6 +4,9 @@
 import sys
 sys.path.insert(0, '../src/')
 import os
+from glob import glob
+import multiprocessing as mp
+import multiprocessing as Process
 #from threading import Lock
 from flask import Flask, render_template, session, request, flash, redirect, url_for
 from flask_socketio import SocketIO, emit, disconnect#, join_room, leave_room, close_room, rooms
@@ -13,6 +16,7 @@ import scipy.io.wavfile
 import numpy as np
 from collections import OrderedDict
 from utils import SoundToText
+from utils import PrepareSound
 from utils import text_clean
 from utils import top_words
 
@@ -139,20 +143,59 @@ def mytext(name=None):
     myaudio = ""
     if request.method == 'POST':
         if 'TestSample' in request.form:
-            myaudio = 'tmp/chunk_s2.wav'
+            myaudio = 'tmp/chunk_s1.wav'
         else:
             myaudio = 'tmp/out.wav'
-    mytextdic = SoundToText(myaudio)
-    atext = ""
+    infodic = {}
+    infodic.update(PrepareSound(myaudio, silencesplit=True))
 
+    inputtasks = glob(myaudio.replace(".wav", "_*.wav"))
+
+    
+
+    mytextdic = {}
+
+    # ## parallel
+    # print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
+    # npool = min(len(inputtasks), mp.cpu_count() - 1)
+    # pool  = mp.Pool(npool)
+    # results = pool.map(SoundToText, inputtasks)
+    # pool.close()
+    # poo.join()
+    # for result in results:
+    #     mytextdic.update(result)
+    
+    # # standard
+    # for j in inputtasks:
+    #     print(j)
+    #     result = Process(target=SoundToText, args=(j,)) #dictionary of values, plots
+    #     mytextdic.update(result)
+
+    # standard
+    for j in inputtasks:
+        print(j)
+        result = SoundToText(j) #dictionary of values, plots
+        mytextdic.update(result)
+
+    ## clear the input files
+    for k in inputtasks:
+        os.remove(k)
+
+    atext = ""
     for i in range(len(mytextdic.keys())):
-        atext += mytextdic[myaudio]
+        atext += mytextdic[myaudio.replace(".wav", "_" + str(i) + ".wav")] + ". "
     
     keytext = top_words(text_clean(atext))
 
     for j in keytext:
         atext = atext.replace(j, "<span style='background-color: #FFFF00'>" + j + "</span>")
-    return render_template("index_audio.html", output_summary = keytext, original_text = atext)
+
+    ## convert atext to a list again, with.
+    atext = atext.split(".")
+
+    ## get audio length
+    audio_length = "%.1f sec" % infodic[myaudio]["duration"]
+    return render_template("index_audio.html", output_summary=keytext, original_text=atext, audio_length=audio_length)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

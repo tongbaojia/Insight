@@ -130,14 +130,17 @@
         <input type="submit" name="TestSample" value="TestSample">
       </form>
       <h2></h2>
-      <h3>Key Texts: </h3>
+      <h3>Audio Length: {{ audio_length }}</h3>
+      <h3>Key Words: </h3>
       <textbox class="display" name="output_text" id="output_text" maxlength="50000">
-        {% for sentence in output_summary %}
-        <h4>{{ sentence }} </h4>
-        {% endfor %}
+        <h4>{% for keywords in output_summary %}
+        {{ keywords  }} 
+        {% endfor %}</h4>
       </textbox>
       <h3>Original Text:</h3>
-      <p>{{ original_text|safe }}</p>
+        {% for sentence in original_text %}
+        <h4>{{ sentence|safe }} </h4>
+        {% endfor %}
       </ul>
     </div>
   </div>
