@@ -143,7 +143,7 @@ def mytext(name=None):
     myaudio = ""
     if request.method == 'POST':
         if 'TestSample' in request.form:
-            myaudio = 'tmp/chunk_s1.wav'
+            myaudio = 'tmp/speech.wav'
         else:
             myaudio = 'tmp/out.wav'
     infodic = {}
@@ -202,4 +202,4 @@ def mytext(name=None):
     return render_template("index_audio.html", output_summary=keytext, original_text=atext, audio_length=audio_length)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, host='0.0.0.0')
