@@ -92,7 +92,7 @@
                 //   console.log(a, b, c);
                 // });
 
-                var constraints = { audio: true, video: false }; 
+                var constraints = window.constraints = { audio: true, video: false }; 
                 navigator.mediaDevices.getUserMedia(constraints)
                 .then(initializeRecorder)
                 .catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.

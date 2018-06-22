@@ -6,11 +6,11 @@ sys.path.insert(0, '../src/')
 import os
 from glob import glob
 import multiprocessing as mp
-import multiprocessing as Process
 #from threading import Lock
 from flask import Flask, render_template, session, request, flash, redirect, url_for
 from flask_socketio import SocketIO, emit, disconnect#, join_room, leave_room, close_room, rooms
 from werkzeug.utils import secure_filename
+from gensim.summarization import summarize
 
 import scipy.io.wavfile
 import numpy as np
@@ -161,14 +161,8 @@ def mytext(name=None):
     # pool  = mp.Pool(npool)
     # results = pool.map(SoundToText, inputtasks)
     # pool.close()
-    # poo.join()
+    # pool.join()
     # for result in results:
-    #     mytextdic.update(result)
-    
-    # # standard
-    # for j in inputtasks:
-    #     print(j)
-    #     result = Process(target=SoundToText, args=(j,)) #dictionary of values, plots
     #     mytextdic.update(result)
 
     # standard
@@ -185,8 +179,18 @@ def mytext(name=None):
     for i in range(len(mytextdic.keys())):
         atext += mytextdic[myaudio.replace(".wav", "_" + str(i) + ".wav")] + ". "
     
+    ## summrization keywords
     keytext = top_words(text_clean(atext))
+    
+    ## summrization sentence
+    sentence = summarize(atext, ratio=0.2, split=True)
 
+    ## for key sentence, make it italice and underline
+    for s in sentence:
+        print(s)
+        atext = atext.replace(s, "<u><i>" + s + "</i></u>")
+
+    ## for key words, make it yellow
     for j in keytext:
         atext = atext.replace(j, "<span style='background-color: #FFFF00'>" + j + "</span>")
 
