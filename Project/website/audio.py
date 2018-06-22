@@ -45,10 +45,17 @@ ALLOWED_EXTENSIONS = set(['txt', 'wav', 'mp3'])
 #                      {'data': 'Server generated event', 'count': count},
 #                      namespace='/test')
 
+@app.route('/')
+def homeindex():
+    return render_template('index.html')
 
-@app.route('/audio')
-def index():
-    return render_template('index_audio.html')
+@app.route('/index')
+def alsohomeindex():
+    return render_template('index.html')
+
+@app.route('/record')
+def recordindex():
+    return render_template('index_record.html')
 
 
 @socketio.on('my_event', namespace='/test')
@@ -106,47 +113,23 @@ def test_disconnect():
     session['audio'] = []
     print('Audio recording finished', request.sid)
 
-## uploading files
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# def allowed_file(filename):
-#     return '.' in filename and \
-#            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-# @app.route('/audio', methods=['GET', 'POST'])
-# def upload_file():
-#     if request.method == 'POST':
-#         # check if the post request has the file part
-#         if 'file' not in request.files:
-#             flash('No file part')
-#             return redirect(request.url)
-#         file = request.files['file']
-#         # if user does not select file, browser also
-#         # submit an empty part without filename
-#         if file.filename == '':
-#             flash('No selected file')
-#             return redirect(request.url)
-#         if file and allowed_file(file.filename):
-#             filename = secure_filename(file.filename)
-#             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#             return redirect(url_for('upload_file',
-#                                     filename=filename))
-#         else:
-#             flash('No selected file')
-#             return redirect(request.url)
-#     return render_template('index_upload.html')
 
-@app.route('/audio', methods=['POST'])
+@app.route('/record', methods=['POST'])
 @socketio.on('mytext', namespace='/test')
+
 def mytext(name=None):
 
     myaudio = ""
     if request.method == 'POST':
+
         if 'TestSample' in request.form:
             myaudio = 'tmp/speech.wav'
         else:
             myaudio = 'tmp/out.wav'
+    
     infodic = {}
+    print("procssing", myaudio)
     infodic.update(PrepareSound(myaudio, silencesplit=True))
 
     inputtasks = glob(myaudio.replace(".wav", "_*.wav"))
@@ -183,7 +166,10 @@ def mytext(name=None):
     keytext = top_words(text_clean(atext))
     
     ## summrization sentence
-    sentence = summarize(atext, ratio=0.2, split=True)
+    try:
+        sentence = summarize(atext, ratio=0.2, split=True)
+    except ValueError:
+        sentence = ""
 
     ## for key sentence, make it italice and underline
     for s in sentence:
@@ -199,7 +185,108 @@ def mytext(name=None):
 
     ## get audio length
     audio_length = "%.1f sec" % infodic[myaudio]["duration"]
-    return render_template("index_audio.html", output_summary=keytext, original_text=atext, audio_length=audio_length)
+    return render_template("index_record.html", output_summary=keytext, original_text=atext, audio_length=audio_length)
+
+
+
+## uploading files
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('upload_file',filename=filename))
+        else:
+            flash('No selected file')
+            return redirect(request.url)
+    return render_template('index_upload.html')
+
+def uptrantext(name=None):
+    myaudio = ""
+    if request.method == 'POST':
+        
+        if 'TestSample' in request.form:
+            myaudio = 'tmp/speech.wav'
+        else:
+            myaudio = 'tmp/out.wav'
+    
+    infodic = {}
+    print("procssing", myaudio)
+    infodic.update(PrepareSound(myaudio, silencesplit=True))
+
+    inputtasks = glob(myaudio.replace(".wav", "_*.wav"))
+
+    
+
+    mytextdic = {}
+
+    # ## parallel
+    # print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
+    # npool = min(len(inputtasks), mp.cpu_count() - 1)
+    # pool  = mp.Pool(npool)
+    # results = pool.map(SoundToText, inputtasks)
+    # pool.close()
+    # pool.join()
+    # for result in results:
+    #     mytextdic.update(result)
+
+    # standard
+    for j in inputtasks:
+        print(j)
+        result = SoundToText(j) #dictionary of values, plots
+        mytextdic.update(result)
+
+    ## clear the input files
+    for k in inputtasks:
+        os.remove(k)
+
+    atext = ""
+    for i in range(len(mytextdic.keys())):
+        atext += mytextdic[myaudio.replace(".wav", "_" + str(i) + ".wav")] + ". "
+    
+    ## summrization keywords
+    keytext = top_words(text_clean(atext))
+    
+    ## summrization sentence
+    try:
+        sentence = summarize(atext, ratio=0.2, split=True)
+    except ValueError:
+        sentence = ""
+
+    ## for key sentence, make it italice and underline
+    for s in sentence:
+        print(s)
+        atext = atext.replace(s, "<u><i>" + s + "</i></u>")
+
+    ## for key words, make it yellow
+    for j in keytext:
+        atext = atext.replace(j, "<span style='background-color: #FFFF00'>" + j + "</span>")
+
+    ## convert atext to a list again, with.
+    atext = atext.split(".")
+
+    ## get audio length
+    audio_length = "%.1f sec" % infodic[myaudio]["duration"]
+    return render_template("index_upload.html", output_summary=keytext, original_text=atext, audio_length=audio_length)
+
+
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0')
