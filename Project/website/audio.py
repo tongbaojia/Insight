@@ -182,6 +182,9 @@ def mytext(name=None):
 
     ## convert atext to a list again, with.
     atext = atext.split(".")
+    atext =[j.capitalize() for j in atext]
+    # for k in inputtasks:
+    #     print(infodic[k]["duration"])
 
     ## get audio length
     audio_length = "%.1f sec" % infodic[myaudio]["duration"]
@@ -217,75 +220,6 @@ def upload_file():
             flash('No selected file')
             return redirect(request.url)
     return render_template('index_upload.html')
-
-def uptrantext(name=None):
-    myaudio = ""
-    if request.method == 'POST':
-        
-        if 'TestSample' in request.form:
-            myaudio = 'tmp/speech.wav'
-        else:
-            myaudio = 'tmp/out.wav'
-    
-    infodic = {}
-    print("procssing", myaudio)
-    infodic.update(PrepareSound(myaudio, silencesplit=True))
-
-    inputtasks = glob(myaudio.replace(".wav", "_*.wav"))
-
-    
-
-    mytextdic = {}
-
-    # ## parallel
-    # print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
-    # npool = min(len(inputtasks), mp.cpu_count() - 1)
-    # pool  = mp.Pool(npool)
-    # results = pool.map(SoundToText, inputtasks)
-    # pool.close()
-    # pool.join()
-    # for result in results:
-    #     mytextdic.update(result)
-
-    # standard
-    for j in inputtasks:
-        print(j)
-        result = SoundToText(j) #dictionary of values, plots
-        mytextdic.update(result)
-
-    ## clear the input files
-    for k in inputtasks:
-        os.remove(k)
-
-    atext = ""
-    for i in range(len(mytextdic.keys())):
-        atext += mytextdic[myaudio.replace(".wav", "_" + str(i) + ".wav")] + ". "
-    
-    ## summrization keywords
-    keytext = top_words(text_clean(atext))
-    
-    ## summrization sentence
-    try:
-        sentence = summarize(atext, ratio=0.2, split=True)
-    except ValueError:
-        sentence = ""
-
-    ## for key sentence, make it italice and underline
-    for s in sentence:
-        print(s)
-        atext = atext.replace(s, "<u><i>" + s + "</i></u>")
-
-    ## for key words, make it yellow
-    for j in keytext:
-        atext = atext.replace(j, "<span style='background-color: #FFFF00'>" + j + "</span>")
-
-    ## convert atext to a list again, with.
-    atext = atext.split(".")
-
-    ## get audio length
-    audio_length = "%.1f sec" % infodic[myaudio]["duration"]
-    return render_template("index_upload.html", output_summary=keytext, original_text=atext, audio_length=audio_length)
-
 
 
 if __name__ == '__main__':
