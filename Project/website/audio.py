@@ -159,7 +159,7 @@ def mytext(name=None):
     if request.method == 'POST':
 
         if 'TestSample' in request.form:
-            myaudio = 'tmp/20180622nprnews.wav'
+            myaudio = 'tmp/speech.wav'
         else:
             myaudio = 'tmp/out.wav'
     
