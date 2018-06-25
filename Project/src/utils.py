@@ -11,9 +11,9 @@ def PrepareSound(file="", fixsplit=False, silencesplit=True):
         then has the option to split the file or not;
         output is a wav file, or splitted wav files;
         with a dictionary of each wav file's information.'''
-    if "wav" in file:
+    if ".wav" in file:
         sound_file = AudioSegment.from_wav(file)
-    if "mp3" in file:
+    if ".mp3" in file:
         sound_file = AudioSegment.from_mp3(file)
     
     info = {}
@@ -24,8 +24,8 @@ def PrepareSound(file="", fixsplit=False, silencesplit=True):
                 "rms": schunk.rms, 
                 "max": schunk.max}
     
-    if "mp3" in file:
-        file = file.replace("mp3", "wav")
+    if ".mp3" in file:
+        file = file.replace(".mp3", ".wav")
         if (not fixsplit) and (not silencesplit):
             print("convert mp3!")
             sound_file.export(file, format="wav")

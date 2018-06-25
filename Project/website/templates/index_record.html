@@ -147,10 +147,16 @@ vid.onplay = function() {
         <input type="submit" name="TestSample" value="TestSample">
       </form>
       <h2></h2>
-      <h3>Audio Length: {{ audio_length }}</h3>
+      <h3>Active Audio Length: {{ audio_length }}</h3>
+      <h3>Key sentence: </h3>
+      <textbox class="display" name="output_sentence" id="output_sentence" maxlength="50000">
+        <h4>{% for sentence in output_sentence %}
+        {{ sentence  }} 
+        {% endfor %}</h4>
+      </textbox>
       <h3>Key Words: </h3>
       <textbox class="display" name="output_text" id="output_text" maxlength="50000">
-        <h4>{% for keywords in output_summary %}
+        <h4>{% for keywords in output_text %}
         {{ keywords  }} 
         {% endfor %}</h4>
       </textbox>

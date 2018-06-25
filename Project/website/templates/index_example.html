@@ -1,0 +1,268 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Meeting Memo</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8"></script>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+    <header id="header">
+      <ul class="actions">
+      <li><a href="index" class="button">Home</a></li>
+      <li><a href="record" class="button">Record</a></li>
+      <li><a href="upload" class="button">Upload</a></li>
+      </ul>
+    </header>
+
+
+
+
+
+
+  <br>
+  <div style="float: left; width: 30%;">
+    <ul>
+    <h2>Record live audio</h2>
+    <form id="connect" method="POST" action="http://127.0.0.1:5000/record#">
+        <input type="submit" value="Record" disabled="">
+    </form>
+    <form id="disconnect" method="POST" action="http://127.0.0.1:5000/record#">
+        <input type="submit" value="Stop" disabled="">
+    </form>
+    <h3>Recording Log</h3>
+    <div id="log"></div>
+    <script>
+      var namespace = '/test';
+      var socket = null;
+      var mediaStream = null;
+
+      // prepare button state
+      $('#disconnect input')[0].disabled = true;
+
+      // audio functions
+      function initializeRecorder(stream){
+         // https://stackoverflow.com/a/42360902/466693
+
+         // doesn't work
+         // if (window.webkitURL) {
+         //     mediaStream = window.webkitURL.createObjectURL(stream);
+         // } else {
+         //     mediaStream = stream;
+         // }
+         mediaStream = stream;
+
+         // get sample rate
+         audio_context = new AudioContext;
+         sampleRate = audio_context.sampleRate;
+         console.log('<sample_rate>', sampleRate);
+         socket.emit('sample_rate', sampleRate);
+
+         var audioInput = audio_context.createMediaStreamSource(stream);
+
+         console.log("Created media stream.");
+
+         var bufferSize = 4096;
+         // record only 1 channel
+         var recorder = audio_context.createScriptProcessor(bufferSize, 1, 1);
+         // specify the processing function
+         recorder.onaudioprocess = recorderProcess;
+         // connect stream to our recorder
+         audioInput.connect(recorder);
+         // connect our recorder to the previous destination
+         recorder.connect(audio_context.destination);          
+      }
+      function recorderProcess(e) {
+        var left = e.inputBuffer.getChannelData(0);
+        socket.emit('audio', left);
+        //socket.emit('audio', convertFloat32ToInt16(left));
+      }
+      function convertFloat32ToInt16(buffer) {
+        l = buffer.length;
+        buf = new Int16Array(l);
+        while (l--) {
+          buf[l] = Math.min(1, buffer[l])*0x7FFF;
+        }
+        console.log(buf);
+        return buf.buffer;
+      }
+
+      $('form#connect').submit(function(event) {
+          if(socket == null){
+            socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+            socket.on('connect', function() {
+                socket.emit('my_event', {data: 'I\'m connected!'});
+                
+                // navigator.getUserMedia({audio: true}, initializeRecorder, function(a, b, c){
+                //   console.log(a, b, c);
+                // });
+
+                var constraints = window.constraints = { audio: true, video: false }; 
+                navigator.mediaDevices.getUserMedia(constraints)
+                .then(initializeRecorder)
+                .catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
+            });
+            socket.on('my_response', function(msg) {
+                $('#log').append('<br>' + $('<div/>').text('Received #' + msg.count + ': ' + msg.data).html());
+            });
+          }
+          else {
+            socket.disconnect();
+            socket.connect();
+          }
+          $('#connect input')[0].disabled = true;
+          $('#disconnect input')[0].disabled = false;
+          return false;
+      });
+      $('form#disconnect').submit(function(event) {
+          mediaStream.getAudioTracks()[0].stop();
+          audio_context.close();
+          socket.emit('disconnect_request');
+          $('#connect input')[0].disabled = false;
+          $('#disconnect input')[0].disabled = true;
+          return false;
+      });
+    </script>
+    </ul>
+  </div>
+
+  <div style="float: right; width: 70%;">
+  <ul>
+    <h2>Text Summarization</h2>
+    <div class="form-container jumbotron" id-"sum-section"="">
+
+<!-- <audio id="myVideo" width="320" height="176" controls>
+  <source src="speech.wav" type="audio/x-wav">
+  Your browser does not support HTML5 audio.
+</audio>
+
+<script>
+var vid = document.getElementById("myVideo");
+vid.onplay = function() {
+    alert("The audio has started to play");
+};
+</script> -->
+
+      <form id="mytext" method="POST" action="http://127.0.0.1:5000/record#">
+        <input type="submit" name="Translate" value="Translate Live" disabled="">
+        <input type="submit" name="TestSample" value="TestSample" disabled="">
+      </form>
+      <h2><a href="https://www.npr.org/2018/06/22/622475092/latest-on-immigration-politics">News Audio</a> from NPR </h2>
+      <h3>Republican lawmakers in the House have punted on immigration once again, delaying a vote on the measure.</h3>
+      <h2></h2>
+      <h3>Active Audio Length: 245.0 sec</h3>
+      <h3>Key sentence: </h3>
+      <textbox class="display" name="output_sentence" id="output_sentence" maxlength="50000">
+        <h4>
+        To present from changing the policy himself two days ago and now to this morning has introduced we make congress should even bother holding the vote on a long term effects. 
+        
+        There are other silly pressing questions right now with a lot of lodges hanging in the bowels reading you've got these kids who were separated from their parents under the present policy he is change that policy with this executive order but there are. 
+        
+        Okay so mad as ascend the pentagon is up to this task what what is the tasked with these twenty thousand children that the administration's talking about held together so stubborn has stepped in the past to help house on a complaint myers they did so in twenty fourteen when there was a surge of young people coming across the border from central america on their own. 
+        
+        She visited a shelter were young people who are on their own are being housed and this was a sort of camera friendly present asian it could've been a show compassion for the white house but the first lady's were stepped on her own message with the jacket that she wore issue is leaving washington again when she returned. 
+        </h4>
+      </textbox>
+      <h3>Key Words: </h3>
+      <textbox class="display" name="output_text" id="output_text" maxlength="50000">
+        <h4>
+        bill 
+        
+        house 
+        
+        policy 
+        
+        present 
+        
+        not 
+        </h4>
+      </textbox>
+      <h3>Original Text:</h3>
+        
+        <h4>[0 s]  You know in terms of <u><i>policy</i></u> reversals the trumpet ministrations handling of the issue of separating my grandchildren from their parents at the border </h4>
+        
+        <h4> [8 s]  He's pretty remarkable </h4>
+        
+        <h4> [9 s]  The administration has gone from denying this was a <u><i>policy</i></u> at all to insisting he was up to congress to change it </h4>
+        
+        <h4> [16 s]  <span style="background-color: #FFFF00">To <u><i>present</i></u> from changing the <u><i>policy</i></u> himself two days ago and now to this morning has introduced we make congress should even bother holding the vote on a long term effects </span></h4>
+        
+        <h4> [26 s]  Congress had our deep hunted plans to vote on a compromise emigration <u><i>bill</i></u> until next week this <u><i>bill</i></u> sought to carve out a path to citizenship for </h4>
+        
+        <h4> [34 s]  Dreamers rogers children it will supply <u><i>bill</i></u>ions of dollars for border walt and help to keep migrant families together in detention </h4>
+        
+        <h4> [41 s]  Let's bring him into what else was on scott horsley </h4>
+        
+        <h4> [43 s]  The opus or through this has got to get more into focus of roses tweaking it's <u><i>not</i></u> even worth trying anymore is the meanest this whole debate over immigration effectively dead for now would certainly <u><i>not</i></u> helpful for those trying to pass a <u><i>bill</i></u> and is <u><i>not</i></u> the first time the presence of sabotage set up for rehmer in his </h4>
+        
+        <h4> [59 s]  Streamers consciousness interview with fox news all week ago with the president misspoke and said he opposed this <u><i>bill</i></u> and white <u><i>house</i></u> and wave of whole day before correct in the record and said no </h4>
+        
+        <h4> [70 s]  He was in support of it </h4>
+        
+        <h4> [71 s]  But today he's quitting the republicans to stop wasting their time on immigration until it can get more votes </h4>
+        
+        <h4> [77 s]  Because democrats he said are just playing games </h4>
+        
+        <h4> [80 s]  That's no surprise <u><i>house</i></u> democrats are <u><i>not</i></u> falling over themselves to pass this <u><i>bill</i></u> all of that sold brom they see the presence on making but in the <u><i>house</i></u> it's <u><i>not</i></u> the democrats were the problem it's republicans who could pass this <u><i>bill</i></u> if they were united they're <u><i>not</i></u> in the <u><i>present</i></u> isn't open and again </h4>
+        
+        <h4> [95 s]  <span style="background-color: #FFFF00">There are other silly pressing questions right now with a lot of lodges hanging in the bowels reading you've got these kids who were separated from their parents under the <u><i>present</i></u> <u><i>policy</i></u> he is change that <u><i>policy</i></u> with this executive order but there are </span></h4>
+        
+        <h4> [108 s]  Lawyers there are aid workers were reportedly saying that </h4>
+        
+        <h4> [112 s]  That is to be hard to track down relatives for a lot of these </h4>
+        
+        <h4> [115 s]  Kids with adam who was addressing et cetera </h4>
+        
+        <h4> [117 s]  There's a lot of confusion on the ground david under the <u><i>present</i></u> sinus executive order changing course with all of fanfare but the russian ago but has <u><i>not</i></u> caught up </h4>
+        
+        <h4> [126 s]  The administration is still says he wants to prosecute everyone who comes across the border illegally </h4>
+        
+        <h4> [132 s]  It's still wrestling with a legal settlement that says they can't attain young people for more than twenty days </h4>
+        
+        <h4> [138 s]  As a clear how you can satisfy both of those conditions and keep families together yesterday the justice department asked the court to revisit the settlement is <u><i>not</i></u> clear that's gonna happen </h4>
+        
+        <h4> [148 s]  An absurdly doesn't look as if congress is to build a prisoner </h4>
+        
+        <h4> [150 s]  Also i'm also curious about something we learn go from the department of human services yesterday which is the fact that agency is asking the pentagon </h4>
+        
+        <h4> [159 s]  To assess whether he can howls of </h4>
+        
+        <h4> [161 s]  Twenty thousand </h4>
+        
+        <h4> [162 s]  Children as defense secretary jim mattison that becky be done </h4>
+        
+        <h4> [166 s]  We have held refugees we're proud </h4>
+        
+        <h4> [169 s]  People thrown out of their homes by the birth weight that the hurricane </h4>
+        
+        <h4> [174 s]  We do whatever it does get corn </h4>
+        
+        <h4> [177 s]  <span style="background-color: #FFFF00">Okay so mad as ascend the pentagon is up to this task what what is the tasked with these twenty thousand children that the administration's talking about held together so stubborn has stepped in the past to help <u><i>house</i></u> on a complaint myers they did so in twenty fourteen when there was a surge of young people coming across the border from central america on their own </span></h4>
+        
+        <h4> [195 s]  Now although the surgeon is more in family units of the gelatin ab <u><i>not</i></u> the <u><i>house</i></u> </h4>
+        
+        <h4> [200 s]  Just young people bought families and self is <u><i>not</i></u> clear </h4>
+        
+        <h4> [203 s]  The pentagon is </h4>
+        
+        <h4> [203 s]  Prepared to do that we're fetch even the chesapeake in cuba </h4>
+        
+        <h4> [206 s]  And stavros she don't ask about to the </h4>
+        
+        <h4> [208 s]  The first lady manu trotted out to the awful lot of hot water or yesterday when she did during of the trip to visit detained him and kids in texas would have </h4>
+        
+        <h4> [216 s]  <span style="background-color: #FFFF00">She visited a shelter were young people who are on their own are being <u><i>house</i></u>d and this was a sort of camera friendly <u><i>present</i></u> asian it could've been a show compassion for the white <u><i>house</i></u> but the first lady's were stepped on her own message with the jacket that she wore issue is leaving washington again when she returned </span></h4>
+        
+        <h4> [234 s]  In the jacket emblazoned with the slogan i really don't care </h4>
+        
+        <h4> [238 s]  Do you know the <u><i>present</i></u> said to stroll in the news media to serve liquor detroit somebody </h4>
+        
+        <h4> [243 s]  And her scuffle reese's cup thanks you're welcome </h4>
+        
+        <h4>  </h4>
+        
+      </div></ul>
+    </div>
+  
+
+
+</body></html>

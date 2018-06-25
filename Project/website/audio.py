@@ -15,6 +15,7 @@ from gensim.summarization import summarize
 import scipy.io.wavfile
 import numpy as np
 from collections import OrderedDict
+
 from utils import SoundToText
 from utils import PrepareSound
 from utils import text_clean
@@ -52,6 +53,40 @@ def homeindex():
 @app.route('/index')
 def alsohomeindex():
     return render_template('index.html')
+
+@app.route('/index_example')
+def exampleindex():
+    return render_template('index_example.html')
+
+
+## uploading files
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('upload_file',filename=filename))
+        else:
+            flash('No selected file')
+            return redirect(request.url)
+    return render_template('index_upload.html')
 
 @app.route('/record')
 def recordindex():
@@ -124,7 +159,7 @@ def mytext(name=None):
     if request.method == 'POST':
 
         if 'TestSample' in request.form:
-            myaudio = 'tmp/speech.wav'
+            myaudio = 'tmp/20180622nprnews.wav'
         else:
             myaudio = 'tmp/out.wav'
     
@@ -134,10 +169,7 @@ def mytext(name=None):
 
     inputtasks = glob(myaudio.replace(".wav", "_*.wav"))
 
-    
-
     mytextdic = {}
-
     # ## parallel
     # print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
     # npool = min(len(inputtasks), mp.cpu_count() - 1)
@@ -147,7 +179,6 @@ def mytext(name=None):
     # pool.join()
     # for result in results:
     #     mytextdic.update(result)
-
     # standard
     for j in inputtasks:
         print(j)
@@ -158,68 +189,47 @@ def mytext(name=None):
     for k in inputtasks:
         os.remove(k)
 
-    atext = ""
+    atext = "" ##initalize the output text
+    atime = 0 ##initalize the output time
+    outtext = ""
     for i in range(len(mytextdic.keys())):
-        atext += mytextdic[myaudio.replace(".wav", "_" + str(i) + ".wav")] + ". "
+        temp_name = myaudio.replace(".wav", "_" + str(i) + ".wav")
+        temp_time = "[" + "%.0f s" % atime  + "]  "
+        atime   += infodic[temp_name]["duration"]
+        atext   +=  mytextdic[temp_name].capitalize() + ". "
+        outtext +=  temp_time + mytextdic[temp_name].capitalize() + ". "
     
-    ## summrization keywords
+    ## summrization keywords; on atext the string
     keytext = top_words(text_clean(atext))
     
-    ## summrization sentence
+    ## summrization sentence; on atext the string
     try:
-        sentence = summarize(atext, ratio=0.2, split=True)
+        sentence = summarize(atext, ratio=0.1, split=True)
     except ValueError:
         sentence = ""
 
     ## for key sentence, make it italice and underline
     for s in sentence:
         print(s)
-        atext = atext.replace(s, "<u><i>" + s + "</i></u>")
-
+        outtext = outtext.replace(s, "<span style='background-color: #FFFF00'>" + s + "</span>")
     ## for key words, make it yellow
     for j in keytext:
-        atext = atext.replace(j, "<span style='background-color: #FFFF00'>" + j + "</span>")
+        outtext = outtext.replace(j, "<u><i>" + j + "</i></u>")
 
-    ## convert atext to a list again, with.
-    atext = atext.split(".")
-    atext =[j.capitalize() for j in atext]
+    ## convert outtext to a list again, with.
+    outtext = outtext.split(".")
+
+    # for k in outtext:
+    #     print(k)
     # for k in inputtasks:
     #     print(infodic[k]["duration"])
 
-    ## get audio length
-    audio_length = "%.1f sec" % infodic[myaudio]["duration"]
-    return render_template("index_record.html", output_summary=keytext, original_text=atext, audio_length=audio_length)
 
+    ## get audio length: full audio length with silence here!
+    ## audio_length = "%.1f sec" % infodic[myaudio]["duration"]
+    audio_length = "%.1f sec" % atime
+    return render_template("index_record.html", output_text=keytext, output_sentence=sentence, original_text=outtext, audio_length=audio_length)
 
-
-## uploading files
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-@app.route('/upload', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('upload_file',filename=filename))
-        else:
-            flash('No selected file')
-            return redirect(request.url)
-    return render_template('index_upload.html')
 
 
 if __name__ == '__main__':
