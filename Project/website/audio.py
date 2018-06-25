@@ -2,7 +2,7 @@
 
 ## http://flask.pocoo.org/docs/1.0/quickstart/
 import sys
-sys.path.insert(0, '../src/')
+sys.path.insert(0, '/home/ubuntu/Insight/Project/src/')
 import os
 from glob import glob
 import multiprocessing as mp
@@ -28,7 +28,7 @@ async_mode = None
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, binary=True)
+#socketio = SocketIO(app, binary=True)
 #socketio = SocketIO(app, async_mode=async_mode)
 #thread = None
 #thread_lock = Lock()
@@ -93,14 +93,14 @@ def recordindex():
     return render_template('index_record.html')
 
 
-@socketio.on('my_event', namespace='/test')
+#@socketio.on('my_event', namespace='/test')
 def test_message(message):
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
          {'data': message['data'], 'count': session['receive_count']})
 
 
-@socketio.on('disconnect_request', namespace='/test')
+#@socketio.on('disconnect_request', namespace='/test')
 def disconnect_request():
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
@@ -108,7 +108,7 @@ def disconnect_request():
     disconnect()
 
 
-@socketio.on('connect', namespace='/test')
+#@socketio.on('connect', namespace='/test')
 def test_connect():
     #global thread
     #with thread_lock:
@@ -117,21 +117,21 @@ def test_connect():
     session['audio'] = []
     emit('my_response', {'data': 'Recording', 'count': 0})
 
-@socketio.on('sample_rate', namespace='/test')
+#@socketio.on('sample_rate', namespace='/test')
 def handle_my_sample_rate(sampleRate):
     session['sample_rate'] = sampleRate
     # send some message to front
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response', {'data': "sampleRate : %s" % sampleRate, 'count': session['receive_count'] })
 
-@socketio.on('audio', namespace='/test')
+#@socketio.on('audio', namespace='/test')
 def handle_my_custom_event(audio):
     #session['audio'] += audio
     #session['audio'] += audio.values()
     values = OrderedDict(sorted(audio.items(), key=lambda t:int(t[0]))).values()
     session['audio'] += values
 
-@socketio.on('disconnect', namespace='/test')
+#@socketio.on('disconnect', namespace='/test')
 def test_disconnect():
     # my_audio = np.array(session['audio'], np.float32)
     # scipy.io.wavfile.write('tmp/out.wav', 44100, my_audio.view('int16'))
@@ -151,8 +151,7 @@ def test_disconnect():
 
 
 @app.route('/record', methods=['POST'])
-@socketio.on('mytext', namespace='/test')
-
+#@socketio.on('mytext', namespace='/test')
 def mytext(name=None):
 
     myaudio = ""
@@ -231,6 +230,6 @@ def mytext(name=None):
     return render_template("index_record.html", output_text=keytext, output_sentence=sentence, original_text=outtext, audio_length=audio_length)
 
 
-
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0')
+    #socketio.run(app, debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
