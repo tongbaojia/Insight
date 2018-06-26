@@ -19,9 +19,22 @@
 
 
 <body>
-  <br>
   <div style="float: left; width: 30%;">
-    <ul>
+    <h2>Play audio</h2>
+    <input type="file" accept="audio/*" capture id="recorder">
+    <audio id="player" controls></audio>
+    <script>
+      var recorder = document.getElementById('recorder');
+      var player = document.getElementById('player');
+
+      recorder.addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        // Do something with the audio file.
+        player.src =  URL.createObjectURL(file);
+      });
+    </script>
+    <h2></h2>
+
     <h2>Record live audio</h2>
     <form id="connect" method="POST" action="#">
         <input type="submit" value="Record">
@@ -167,6 +180,13 @@ vid.onplay = function() {
       </ul>
     </div>
   </div>
+
+    <script src="scripts/install.js"></script>
+
+    <script src="scripts/fill.js"></script>
+
+    <script src="scripts/app.js"></script>
 </body>
+
 
 </html>

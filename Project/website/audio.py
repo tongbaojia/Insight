@@ -2,7 +2,10 @@
 
 ## http://flask.pocoo.org/docs/1.0/quickstart/
 import sys
-sys.path.insert(0, '/home/ubuntu/Insight/Project/src/')
+topdir = '/Users/renormalization/Git/Insight/'
+#topdir = '/home/ubuntu/Insight/'
+#sys.path.insert(0, '/home/ubuntu/Insight/Project/src/')
+sys.path.insert(0, topdir + 'Project/src/')
 import os
 from glob import glob
 import multiprocessing as mp
@@ -28,13 +31,13 @@ async_mode = None
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-#socketio = SocketIO(app, binary=True)
+socketio = SocketIO(app, binary=True)
 #socketio = SocketIO(app, async_mode=async_mode)
 #thread = None
 #thread_lock = Lock()
 
-UPLOAD_FOLDER = 'tmp/'
-ALLOWED_EXTENSIONS = set(['txt', 'wav', 'mp3'])
+UPLOAD_FOLDER = topdir + 'Project/website/tmp/'
+ALLOWED_EXTENSIONS = set(['wav'])
 
 #def background_thread():
 #    """Example of how to send server generated events to clients."""
@@ -93,14 +96,14 @@ def recordindex():
     return render_template('index_record.html')
 
 
-#@socketio.on('my_event', namespace='/test')
+@socketio.on('my_event', namespace='/test')
 def test_message(message):
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
          {'data': message['data'], 'count': session['receive_count']})
 
 
-#@socketio.on('disconnect_request', namespace='/test')
+@socketio.on('disconnect_request', namespace='/test')
 def disconnect_request():
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response',
@@ -108,7 +111,7 @@ def disconnect_request():
     disconnect()
 
 
-#@socketio.on('connect', namespace='/test')
+@socketio.on('connect', namespace='/test')
 def test_connect():
     #global thread
     #with thread_lock:
@@ -117,21 +120,21 @@ def test_connect():
     session['audio'] = []
     emit('my_response', {'data': 'Recording', 'count': 0})
 
-#@socketio.on('sample_rate', namespace='/test')
+@socketio.on('sample_rate', namespace='/test')
 def handle_my_sample_rate(sampleRate):
     session['sample_rate'] = sampleRate
     # send some message to front
     session['receive_count'] = session.get('receive_count', 0) + 1
     emit('my_response', {'data': "sampleRate : %s" % sampleRate, 'count': session['receive_count'] })
 
-#@socketio.on('audio', namespace='/test')
+@socketio.on('audio', namespace='/test')
 def handle_my_custom_event(audio):
     #session['audio'] += audio
     #session['audio'] += audio.values()
     values = OrderedDict(sorted(audio.items(), key=lambda t:int(t[0]))).values()
     session['audio'] += values
 
-#@socketio.on('disconnect', namespace='/test')
+@socketio.on('disconnect', namespace='/test')
 def test_disconnect():
     # my_audio = np.array(session['audio'], np.float32)
     # scipy.io.wavfile.write('tmp/out.wav', 44100, my_audio.view('int16'))
@@ -143,7 +146,7 @@ def test_disconnect():
     sindata = np.sin(my_audio)
     scaled = np.round(32767*sindata)
     newdata = scaled.astype(np.int16)
-    scipy.io.wavfile.write('tmp/out.wav', sample_rate, newdata)
+    scipy.io.wavfile.write(UPLOAD_FOLDER + '/out.wav', sample_rate, newdata)
 
     session['audio'] = []
     print('Audio recording finished', request.sid)
@@ -151,16 +154,16 @@ def test_disconnect():
 
 
 @app.route('/record', methods=['POST'])
-#@socketio.on('mytext', namespace='/test')
+@socketio.on('mytext', namespace='/test')
 def mytext(name=None):
 
     myaudio = ""
     if request.method == 'POST':
 
         if 'TestSample' in request.form:
-            myaudio = 'tmp/speech.wav'
+            myaudio = UPLOAD_FOLDER + 'speech.wav'
         else:
-            myaudio = 'tmp/out.wav'
+            myaudio = UPLOAD_FOLDER + 'out.wav'
     
     infodic = {}
     print("procssing", myaudio)
@@ -231,5 +234,5 @@ def mytext(name=None):
 
 
 if __name__ == '__main__':
-    #socketio.run(app, debug=True, host='0.0.0.0')
-    app.run(debug=True, host='0.0.0.0')
+    socketio.run(app, debug=True, host='0.0.0.0')
+    #app.run(debug=True, host='0.0.0.0')
