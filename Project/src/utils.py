@@ -3,7 +3,9 @@ import speech_recognition as sr
 import string, re, spacy
 from pydub import AudioSegment ##for audio spliting
 from pydub.silence import split_on_silence
-from collections import Counter
+from collections import Counter, OrderedDict
+import uuid
+
 
 def PrepareSound(file="", fixsplit=False, silencesplit=True):
     '''input is a file path; can be mp3 or wav; 
@@ -15,8 +17,11 @@ def PrepareSound(file="", fixsplit=False, silencesplit=True):
         sound_file = AudioSegment.from_wav(file)
     if ".mp3" in file:
         sound_file = AudioSegment.from_mp3(file)
+    if ".ogg" in file:
+        sound_file = AudioSegment.from_ogg(file)
     
-    info = {}
+    unique_filename = str(uuid.uuid4())
+    info = OrderedDict()
     def getinfo(schunk):
         return {"dBFS": schunk.dBFS, 
                 "max_dBFS": schunk.max_dBFS, 
@@ -29,14 +34,19 @@ def PrepareSound(file="", fixsplit=False, silencesplit=True):
         if (not fixsplit) and (not silencesplit):
             print("convert mp3!")
             sound_file.export(file, format="wav")
+    if ".ogg" in file:
+        file = file.replace(".ogg", ".wav")
+        if (not fixsplit) and (not silencesplit):
+            print("convert ogg!")
+            sound_file.export(file, format="wav")
     
-    ##always keep the whole file info
-    info[file] = getinfo(sound_file)
+    ## keep the whole file info
+    ##info[file] = getinfo(sound_file)
         
     if fixsplit:
         ##split into 20 second chunks
         for i, chunk in enumerate(sound_file[::20 * 1000]):
-            out_file = file.replace(".wav", "_" + str(i) + ".wav")
+            out_file = file.replace(".wav", unique_filename + "_" + str(i) +  ".wav")
             with open(out_file, "wb") as f:
                 chunk.export(f, format="wav")
             info[out_file] = getinfo(chunk)
@@ -53,7 +63,7 @@ def PrepareSound(file="", fixsplit=False, silencesplit=True):
             # consider it silent; roughly this is 10dB, intensity 1/10 of the ave
             silence_thresh= (sound_file.dBFS * 1.5 - sound_file.max_dBFS/2))
         for i, chunk in enumerate(audio_chunks):
-            out_file = file.replace(".wav", "_" + str(i) + ".wav")
+            out_file = file.replace(".wav", unique_filename + "_" + str(i) + ".wav")
             chunk.export(out_file, format="wav")
             info[out_file] = getinfo(chunk)
         #print("silent split!")
@@ -167,6 +177,9 @@ def top_words(input_data, keeptype=["NOUN", "PROPN", "NUM", "ADJ", "ADV"], doalp
             tokens.append(tok.lower_)
     
     common_words = [w[0] for w in Counter(tokens).most_common(nwords)]
+    ##sort them in order of the text
+    common_words.sort(key=lambda x: tokens.index(x))
+
     # remove large strings of whitespace
     return common_words
 

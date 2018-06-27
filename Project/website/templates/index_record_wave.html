@@ -1,0 +1,294 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Meeting Memo</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8"></script>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+    <header id="header">
+      <ul class="actions">
+      <li><a href="index" class="button">Home</a></li>
+      <li><a href="summary" class="button">Summary</a></li>
+      <li><a href="record" class="button">Record</a></li>
+      <li><a href="upload" class="button">Upload</a></li>
+      <li><a href="example" class="button">Example</a></li>
+      </ul>
+    </header>
+
+</head>
+
+
+
+<body>
+  <br>
+  <div style="float: center; width: 50%;">
+    
+    <h2>Record live audio</h2>
+      <section class="main-controls">
+        <canvas class="visualizer" height="60px"></canvas>
+        <div id="buttons" >
+          <button class="record">Record</button>
+          <button class="stop">Stop</button>
+        </div>
+      </section>
+
+      <section class="sound-clips">
+
+      </section>
+    </ul>
+  </div>
+
+    
+
+    <h2></h2>
+
+      <script>
+      var manifest_url = location.href + 'manifest.webapp';
+      function install(ev) {
+        ev.preventDefault();
+        // define the manifest URL
+        // install the app
+        var installLocFind = navigator.mozApps.install(manifest_url);
+        installLocFind.onsuccess = function(data) {
+          // App is installed, do something 
+        };
+        installLocFind.onerror = function() {
+          // App wasn't installed, info is in
+          // installapp.error.name
+          alert(installLocFind.error.name);
+        };
+      };
+
+      // get a reference to the button and call install() on click if the app isn't already installed. If it is, hide the button.
+      var button = document.getElementById('install-btn');
+
+      var installCheck = navigator.mozApps.checkInstalled(manifest_url);
+
+      installCheck.onsuccess = function() {
+        if(installCheck.result) {
+          button.style.display = "none";
+        } else {
+          button.addEventListener('click', install, false);
+        };
+      };
+    </script>
+
+    <script>
+      (function() {
+
+      var promisifiedOldGUM = function(constraints, successCallback, errorCallback) {
+
+        // First get ahold of getUserMedia, if present
+        var getUserMedia = (navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia);
+
+        // Some browsers just don't implement it - return a rejected promise with an error
+        // to keep a consistent interface
+        if(!getUserMedia) {
+          return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+        }
+
+        // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+        return new Promise(function(successCallback, errorCallback) {
+          getUserMedia.call(navigator, constraints, successCallback, errorCallback);
+        });
+        
+      }
+
+      // Older browsers might not implement mediaDevices at all, so we set an empty object first
+      if(navigator.mediaDevices === undefined) {
+        navigator.mediaDevices = {};
+      }
+
+      // Some browsers partially implement mediaDevices. We can't just assign an object
+      // with getUserMedia as it would overwrite existing properties.
+      // Here, we will just add the getUserMedia property if it's missing.
+      if(navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = promisifiedOldGUM;
+      }
+      
+    })();
+    </script>
+
+
+    <script>// set up basic variables for app
+
+  var record = document.querySelector('.record');
+  var stop = document.querySelector('.stop');
+  var soundClips = document.querySelector('.sound-clips');
+  var canvas = document.querySelector('.visualizer');
+  var mainSection = document.querySelector('.main-controls');
+
+  // disable stop button while not recording
+
+  stop.disabled = true;
+
+  // visualiser setup - create web audio api context and canvas
+
+  var audioCtx = new (window.AudioContext || webkitAudioContext)();
+  var canvasCtx = canvas.getContext("2d");
+
+  //main block for doing the audio recording
+
+  if (navigator.mediaDevices.getUserMedia) {
+    console.log('getUserMedia supported.');
+
+    var constraints = { audio: true };
+    var chunks = [];
+
+    var onSuccess = function(stream) {
+      var mediaRecorder = new MediaRecorder(stream);
+
+      visualize(stream);
+
+      record.onclick = function() {
+        mediaRecorder.start();
+        console.log(mediaRecorder.state);
+        console.log("recorder started");
+        record.style.background = "red";
+
+        stop.disabled = false;
+        record.disabled = true;
+      }
+
+      stop.onclick = function() {
+        mediaRecorder.stop();
+        console.log(mediaRecorder.state);
+        console.log("recorder stopped");
+        record.style.background = "";
+        record.style.color = "";
+        // mediaRecorder.requestData();
+
+        stop.disabled = true;
+        record.disabled = false;
+      }
+
+      mediaRecorder.onstop = function(e) {
+        console.log("data available after MediaRecorder.stop() called.");
+
+        var clipName = prompt('Enter a name for your sound clip:','My unnamed clip');
+        console.log(clipName);
+        var clipContainer = document.createElement('article');
+        var clipLabel = document.createElement('p');
+        var audio = document.createElement('audio');
+        var deleteButton = document.createElement('button');
+       
+        clipContainer.classList.add('clip');
+        audio.setAttribute('controls', '');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete';
+
+        if(clipName === null) {
+          clipLabel.textContent = 'My unnamed clip';
+        } else {
+          clipLabel.textContent = clipName;
+        }
+
+        clipContainer.appendChild(audio);
+        clipContainer.appendChild(clipLabel);
+        clipContainer.appendChild(deleteButton);
+        soundClips.appendChild(clipContainer);
+
+        audio.controls = true;
+        var blob = new Blob(chunks, { 'type' : 'audio/mp3;' });
+        chunks = [];
+        var audioURL = window.URL.createObjectURL(blob);
+        audio.src = audioURL;
+        console.log("recorder stopped");
+
+        deleteButton.onclick = function(e) {
+          evtTgt = e.target;
+          evtTgt.parentNode.parentNode.removeChild(evtTgt.parentNode);
+        }
+
+        clipLabel.onclick = function() {
+          var existingName = clipLabel.textContent;
+          var newClipName = prompt('Enter a new name for your sound clip?');
+          if(newClipName === null) {
+            clipLabel.textContent = existingName;
+          } else {
+            clipLabel.textContent = newClipName;
+          }
+        }
+      }
+
+      mediaRecorder.ondataavailable = function(e) {
+        chunks.push(data);
+      }
+    }
+
+    var onError = function(err) {
+      console.log('The following error occured: ' + err);
+    }
+
+    navigator.mediaDevices.getUserMedia(constraints).then(onSuccess, onError);
+
+  } else {
+     console.log('getUserMedia not supported on your browser!');
+  }
+
+  function visualize(stream) {
+    var source = audioCtx.createMediaStreamSource(stream);
+
+    var analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.frequencyBinCount;
+    var dataArray = new Uint8Array(bufferLength);
+
+    source.connect(analyser);
+    //analyser.connect(audioCtx.destination);
+
+    draw()
+
+    function draw() {
+      WIDTH = canvas.width/2
+      HEIGHT = canvas.height;
+
+      requestAnimationFrame(draw);
+
+      analyser.getByteTimeDomainData(dataArray);
+
+      canvasCtx.fillStyle = 'rgb(256, 256, 256)';
+      canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+
+      canvasCtx.beginPath();
+
+      var sliceWidth = WIDTH * 1.0 / bufferLength;
+      var x = 0;
+
+      for(var i = 0; i < bufferLength; i++) {
+   
+        var v = dataArray[i] / 128.0;
+        var y = v * HEIGHT/2;
+
+        if(i === 0) {
+          canvasCtx.moveTo(x, y);
+        } else {
+          canvasCtx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      canvasCtx.lineTo(WIDTH, canvas.height/2);
+      canvasCtx.stroke();
+
+    }
+  }
+
+  window.onresize = function() {
+    canvas.width = mainSection.offsetWidth;
+  }
+
+  window.onresize();
+  </script>
+</body>
+
+
+</html>

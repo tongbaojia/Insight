@@ -31,23 +31,16 @@ async_mode = None
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, binary=True)
-#socketio = SocketIO(app, async_mode=async_mode)
+#socketio = SocketIO(app, binary=True)
+
 #thread = None
 #thread_lock = Lock()
 
 UPLOAD_FOLDER = topdir + 'Project/website/tmp/'
-ALLOWED_EXTENSIONS = set(['wav'])
-
-#def background_thread():
-#    """Example of how to send server generated events to clients."""
-#    count = 0
-#    while True:
-#        socketio.sleep(10)
-#        count += 1
-#        socketio.emit('my_response',
-#                      {'data': 'Server generated event', 'count': count},
-#                      namespace='/test')
+ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'ogg'])
+## uploading files
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def homeindex():
@@ -57,15 +50,14 @@ def homeindex():
 def alsohomeindex():
     return render_template('index.html')
 
-@app.route('/index_example')
+@app.route('/example')
 def exampleindex():
     return render_template('index_example.html')
 
 
-## uploading files
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
+@app.route('/upload')
+def uploadindex():
+    return render_template('index_upload.html')
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -91,85 +83,42 @@ def upload_file():
             return redirect(request.url)
     return render_template('index_upload.html')
 
+
 @app.route('/record')
 def recordindex():
     return render_template('index_record.html')
 
 
-@socketio.on('my_event', namespace='/test')
-def test_message(message):
-    session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('my_response',
-         {'data': message['data'], 'count': session['receive_count']})
+@app.route('/summary')
+def summaryindex():
+    tmpfiles = [str(i).replace(UPLOAD_FOLDER, "") for i in glob(UPLOAD_FOLDER + "*.wav")]
+    tmpfiles += [str(i).replace(UPLOAD_FOLDER, "") for i in glob(UPLOAD_FOLDER + "*.mp3")]
+    tmpfiles += [str(i).replace(UPLOAD_FOLDER, "") for i in glob(UPLOAD_FOLDER + "*.ogg")]
+    return render_template('index_summary.html', tmpfiles=tmpfiles)
 
-
-@socketio.on('disconnect_request', namespace='/test')
-def disconnect_request():
-    session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('my_response',
-         {'data': 'Disconnected!', 'count': session['receive_count']})
-    disconnect()
-
-
-@socketio.on('connect', namespace='/test')
-def test_connect():
-    #global thread
-    #with thread_lock:
-    #    if thread is None:
-    #        thread = socketio.start_background_task(target=background_thread)
-    session['audio'] = []
-    emit('my_response', {'data': 'Recording', 'count': 0})
-
-@socketio.on('sample_rate', namespace='/test')
-def handle_my_sample_rate(sampleRate):
-    session['sample_rate'] = sampleRate
-    # send some message to front
-    session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('my_response', {'data': "sampleRate : %s" % sampleRate, 'count': session['receive_count'] })
-
-@socketio.on('audio', namespace='/test')
-def handle_my_custom_event(audio):
-    #session['audio'] += audio
-    #session['audio'] += audio.values()
-    values = OrderedDict(sorted(audio.items(), key=lambda t:int(t[0]))).values()
-    session['audio'] += values
-
-@socketio.on('disconnect', namespace='/test')
-def test_disconnect():
-    # my_audio = np.array(session['audio'], np.float32)
-    # scipy.io.wavfile.write('tmp/out.wav', 44100, my_audio.view('int16'))
-    #print(my_audio.view('int16'))
-
-    # https://stackoverflow.com/a/18644461/466693
-    sample_rate = session['sample_rate']
-    my_audio = np.array(session['audio'], np.float32)
-    sindata = np.sin(my_audio)
-    scaled = np.round(32767*sindata)
-    newdata = scaled.astype(np.int16)
-    scipy.io.wavfile.write(UPLOAD_FOLDER + '/out.wav', sample_rate, newdata)
-
-    session['audio'] = []
-    print('Audio recording finished', request.sid)
-
-
-
-@app.route('/record', methods=['POST'])
-@socketio.on('mytext', namespace='/test')
+@app.route('/summary', methods=['GET', 'POST'])
+#@socketio.on('mytext', namespace='/test')
 def mytext(name=None):
 
+    tmpfiles = [str(i).replace(UPLOAD_FOLDER, "") for i in glob(UPLOAD_FOLDER + "*.wav")]
+    tmpfiles += [str(i).replace(UPLOAD_FOLDER, "") for i in glob(UPLOAD_FOLDER + "*.mp3")]
+    tmpfiles += [str(i).replace(UPLOAD_FOLDER, "") for i in glob(UPLOAD_FOLDER + "*.ogg")]
+    
     myaudio = ""
     if request.method == 'POST':
-
-        if 'TestSample' in request.form:
-            myaudio = UPLOAD_FOLDER + 'speech.wav'
-        else:
-            myaudio = UPLOAD_FOLDER + 'out.wav'
+        myaudio = UPLOAD_FOLDER + str(request.form.get('TranslateFile'))
+        # if 'TestSample' in request.form:
+        #     myaudio = UPLOAD_FOLDER + 'speech.wav'
+        # else:
+        #     myaudio = UPLOAD_FOLDER + 'out.wav'
     
     infodic = {}
-    print("procssing", myaudio)
+    #myaudio = UPLOAD_FOLDER + "20180622_me_latest_on_immigration_politics.mp3"
+    print("processing", myaudio)
+
     infodic.update(PrepareSound(myaudio, silencesplit=True))
 
-    inputtasks = glob(myaudio.replace(".wav", "_*.wav"))
+    inputtasks = infodic.keys() ## this is the ordered files
 
     mytextdic = {}
     # ## parallel
@@ -194,8 +143,7 @@ def mytext(name=None):
     atext = "" ##initalize the output text
     atime = 0 ##initalize the output time
     outtext = ""
-    for i in range(len(mytextdic.keys())):
-        temp_name = myaudio.replace(".wav", "_" + str(i) + ".wav")
+    for temp_name in infodic.keys():
         temp_time = "[" + "%.0f s" % atime  + "]  "
         atime   += infodic[temp_name]["duration"]
         atext   +=  mytextdic[temp_name].capitalize() + ". "
@@ -206,7 +154,7 @@ def mytext(name=None):
     
     ## summrization sentence; on atext the string
     try:
-        sentence = summarize(atext, ratio=0.1, split=True)
+        sentence = summarize(atext, ratio=0.2, split=True)
     except ValueError:
         sentence = ""
 
@@ -226,13 +174,12 @@ def mytext(name=None):
     # for k in inputtasks:
     #     print(infodic[k]["duration"])
 
-
     ## get audio length: full audio length with silence here!
     ## audio_length = "%.1f sec" % infodic[myaudio]["duration"]
     audio_length = "%.1f sec" % atime
-    return render_template("index_record.html", output_text=keytext, output_sentence=sentence, original_text=outtext, audio_length=audio_length)
+    return render_template("index_summary.html", output_text=keytext, output_sentence=sentence, original_text=outtext, audio_length=audio_length, tmpfiles=tmpfiles)
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0')
-    #app.run(debug=True, host='0.0.0.0')
+    #socketio.run(app, debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
