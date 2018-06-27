@@ -68,7 +68,8 @@
          */
         function startRecording() {
             // Access the Microphone using the navigator.getUserMedia method to obtain a stream
-            navigator.getUserMedia({ audio: true }, function (stream) {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(
+              function (stream) {
                 // Expose the stream to be accessible globally
                 audio_stream = stream;
                 // Create the MediaStreamSource for the Recorder library
