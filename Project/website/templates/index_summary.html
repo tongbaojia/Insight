@@ -34,7 +34,7 @@
       <textbox class="display" name="output_sentence" id="output_sentence" maxlength="50000">
         <ul>
         {% for sentence in output_sentence %}
-          <li><h3><font color='#DC143C'>{{ sentence }} </font></h3></li>
+          <li><h3><font color='#339900'>{{ sentence }} </font></h3></li>
         {% endfor %}
         </ul>
       </textbox>
@@ -44,7 +44,7 @@
       <textbox class="display" name="output_text" id="output_text" maxlength="50000">
         <center>
         <h3>{% for keywords in output_text %}
-        <font color='#002147'>#{{ keywords }} </font>
+        <font color='#3333ff'>#{{ keywords }} </font>
         {% endfor %}</h3>
         </center>
       <left>
@@ -82,10 +82,12 @@
     </div>
 
     <h2><center>Full transcript</center></h2>
-        <center><h4>Active audio length {{ audio_length }}</h4></center>
-        {% for sentence in original_text %}
-        <h4>{{ sentence|safe }} </h4>
-        {% endfor %}
+    <center><h4>Active audio length {{ audio_length }}</h4></center>
+      <p style="text-align:left; font-family: Helvetica; font-size:18px">
+      {% for sentence in original_text %}
+      {{ sentence|safe }}. <br>
+      {% endfor %}
+      </p>
   </div>
 </body>
 

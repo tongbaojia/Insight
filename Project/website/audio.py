@@ -121,20 +121,20 @@ def mytext(name=None):
     inputtasks = infodic.keys() ## this is the ordered files
 
     mytextdic = {}
-    # ## parallel
-    # print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
-    # npool = min(len(inputtasks), mp.cpu_count() - 1)
-    # pool  = mp.Pool(npool)
-    # results = pool.map(SoundToText, inputtasks)
-    # pool.close()
-    # pool.join()
-    # for result in results:
-    #     mytextdic.update(result)
-    # standard
-    for j in inputtasks:
-        print(j)
-        result = SoundToText(j) #dictionary of values, plots
+    ## parallel
+    print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
+    npool = min(len(inputtasks), mp.cpu_count() - 2)
+    pool  = mp.Pool(npool)
+    results = pool.map(SoundToText, inputtasks)
+    pool.close()
+    pool.join()
+    for result in results:
         mytextdic.update(result)
+    # # standard
+    # for j in inputtasks:
+    #     print(j)
+    #     result = SoundToText(j) #dictionary of values, plots
+    #     mytextdic.update(result)
 
     ## clear the input files
     for k in inputtasks:
@@ -155,17 +155,17 @@ def mytext(name=None):
     
     ## summrization sentence; on atext the string
     try:
-        sentence = summarize(atext, ratio=0.05, split=True)
+        sentence = summarize(atext, ratio=0.2, split=True)
     except ValueError:
         sentence = [atext.split(".")[0]]
 
     ## for key sentence, make it italice and underline
     for s in sentence:
         print(s)
-        outtext = outtext.replace(s, "<span style='background-color: #FF7F50'>" + s + "</span>")
+        outtext = outtext.replace(s, "<span style='background-color: #ccffcc'>" + s + "</span>")
     ## for key words, make it yellow
     for j in keytext:
-        outtext = outtext.replace(j, "<u><i>" + j + "</i></u>")
+        outtext = outtext.replace(j, "<u><i><b>" + j + "</b></i></u>")
 
     ## convert outtext to a list again, with.
     outtext = outtext.split(".")

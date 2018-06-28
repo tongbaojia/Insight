@@ -1,7 +1,8 @@
 # MeetingTextMemo
 
 Welcome to Tony's project code page!
-## Project website: http://meetingmemo.com
+
+## Project website: [MeetingMemo](http://meetingmemo.com)
 
 ## Structure
 
