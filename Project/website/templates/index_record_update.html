@@ -22,19 +22,15 @@
 
 <body>
   <br>
-  <div align="center">
+  <div style="float: center; width: 50%;">
     
-    <h1>Record and save live audio</h1>
-    <h4>This webpage currently only supports firefox.</h4>
-    <h4>We recommend you use your pre-recorded audio file for the best experience.</h4>
-    <br>
+    <h2>Record live audio</h2>
     <!-- Draw the action buttons -->
-    <h3>Click Start to begin your recording; click stop to end your recording. </h3>
-    <button id="start-btn" class="button" style="font-size:20px">Start recording</button>
-    <button id="stop-btn" class="button" style="font-size:20px" disabled>Stop recording</button>
+    <button id="start-btn" class="button">Start recording</button>
+    <button id="stop-btn" class="button" disabled>Stop recording</button>
     <br><br>
     <!-- List item to store the recording files so they can be played in the browser -->
-    <h3>Your live recordings will show below; click on the file link to download.</h3>
+    <h3>Stored Recordings; click on the time link to download</h3>
     <ul id="recordingslist"></ul>
 
     <script>
@@ -72,28 +68,33 @@
          */
         function startRecording() {
             // Access the Microphone using the navigator.getUserMedia method to obtain a stream
-            navigator.mediaDevices.getUserMedia({ audio: true }).then(
-              function (stream) {
-                // Expose the stream to be accessible globally
-                audio_stream = stream;
-                // Create the MediaStreamSource for the Recorder library
-                var input = audio_context.createMediaStreamSource(stream);
-                console.log('Media stream succesfully created');
+            if (navigator.mediaDevices.getUserMedia){
+              navigator.mediaDevices.getUserMedia({ audio: true }).then(
+                function (stream) {
+                  // Expose the stream to be accessible globally
+                  audio_stream = stream;
+                  // Create the MediaStreamSource for the Recorder library
+                  var input = audio_context.createMediaStreamSource(stream);
+                  console.log('Media stream succesfully created');
 
-                // Initialize the Recorder Library
-                recorder = new Recorder(input);
-                console.log('Recorder initialised');
+                  // Initialize the Recorder Library
+                  recorder = new Recorder(input);
+                  console.log('Recorder initialised');
 
-                // Start recording !
-                recorder && recorder.record();
-                console.log('Recording...');
+                  // Start recording !
+                  recorder && recorder.record();
+                  console.log('Recording...');
 
-                // Disable Record button and enable stop button !
-                document.getElementById("start-btn").disabled = true;
-                document.getElementById("stop-btn").disabled = false;
-            }, function (e) {
-                console.error('No live audio input: ' + e);
-            });
+                  // Disable Record button and enable stop button !
+                  document.getElementById("start-btn").disabled = true;
+                  document.getElementById("stop-btn").disabled = false;
+              }, function (e) {
+                  console.error('No live audio input: ' + e);
+              });
+            }
+            else {
+              console.log('getUserMedia not supported on your browser!');
+            }
         }
 
         /**
@@ -542,6 +543,76 @@
   },{}]},{},[1])(1)
   });
       
+    </script>
+
+    <script>
+      var manifest_url = location.href + 'manifest.webapp';
+      function install(ev) {
+        ev.preventDefault();
+        // define the manifest URL
+        // install the app
+        var installLocFind = navigator.mozApps.install(manifest_url);
+        installLocFind.onsuccess = function(data) {
+          // App is installed, do something 
+        };
+        installLocFind.onerror = function() {
+          // App wasn't installed, info is in
+          // installapp.error.name
+          alert(installLocFind.error.name);
+        };
+      };
+
+      // get a reference to the button and call install() on click if the app isn't already installed. If it is, hide the button.
+      var button = document.getElementById('install-btn');
+
+      var installCheck = navigator.mozApps.checkInstalled(manifest_url);
+
+      installCheck.onsuccess = function() {
+        if(installCheck.result) {
+          button.style.display = "none";
+        } else {
+          button.addEventListener('click', install, false);
+        };
+      };
+    </script>
+
+    <script>
+      (function() {
+
+      var promisifiedOldGUM = function(constraints, successCallback, errorCallback) {
+
+        // First get ahold of getUserMedia, if present
+        var getUserMedia = (navigator.getUserMedia ||
+            navigator.webkitGetUserMedia ||
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia);
+
+        // Some browsers just don't implement it - return a rejected promise with an error
+        // to keep a consistent interface
+        if(!getUserMedia) {
+          return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+        }
+
+        // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+        return new Promise(function(successCallback, errorCallback) {
+          getUserMedia.call(navigator, constraints, successCallback, errorCallback);
+        });
+        
+      }
+
+      // Older browsers might not implement mediaDevices at all, so we set an empty object first
+      if(navigator.mediaDevices === undefined) {
+        navigator.mediaDevices = {};
+      }
+
+      // Some browsers partially implement mediaDevices. We can't just assign an object
+      // with getUserMedia as it would overwrite existing properties.
+      // Here, we will just add the getUserMedia property if it's missing.
+      if(navigator.mediaDevices.getUserMedia === undefined) {
+        navigator.mediaDevices.getUserMedia = promisifiedOldGUM;
+      }
+      
+    })();
     </script>
   </div>
 </body>

@@ -45,7 +45,7 @@ def PrepareSound(file="", fixsplit=False, silencesplit=True):
         
     if fixsplit:
         ##split into 20 second chunks
-        for i, chunk in enumerate(sound_file[::20 * 1000]):
+        for i, chunk in enumerate(sound_file[::100 * 1000]):
             out_file = file.replace(".wav", unique_filename + "_" + str(i) +  ".wav")
             with open(out_file, "wb") as f:
                 chunk.export(f, format="wav")
@@ -111,12 +111,15 @@ def SoundToText(file="", useGoogle=False):
     
 def text_clean(input_text):
     '''clean and remove some common words'''
+    # replace . from sphinx, this is very tricky
+    output_text = input_text.replace(". ", "")
+    
     table = str.maketrans('', '', string.punctuation)
     # get rid of punctuation
-    output_text = input_text.translate(table)
+    output_text = output_text.translate(table)
     
     # get rid of newlines
-    output_text = output_text.strip().replace("\n", " ").replace("\r", " ")
+    output_text = output_text.strip().replace("\n", ". ").replace("\r", ".")
     
     # replace twitter @mentions
     mentionFinder = re.compile(r"@[a-z0-9_]{1,15}", re.IGNORECASE)
@@ -124,6 +127,9 @@ def text_clean(input_text):
     
     # replace HTML symbols
     output_text = output_text.replace("&amp;", "and").replace("&gt;", ">").replace("&lt;", "<")
+    
+    # lowercase
+    output_text = output_text.lower()
 
     return output_text
 

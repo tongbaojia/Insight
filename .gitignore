@@ -32,6 +32,7 @@
 *.json
 *.pem
 *.pkl
+*.csv
 
 # Logs and databases #
 ######################

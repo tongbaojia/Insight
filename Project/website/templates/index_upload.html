@@ -22,20 +22,21 @@
 
 <body>
   <br>
-  <div style="float: center;">
+  <div align="center">
     <ul>
     <header class="navbar">
 
-    <h1>Upload audio File</h1>
-    <h3>Please upload a wav/mp3 file, with size less than 16 Mb</h3>
+    <h1>Upload your audio File</h1>
+    <h3>Choose your local wav/mp3 file, with size less than 16 Mb.</h3>
+    <br>
     <form method=post enctype=multipart/form-data>
         <input type=file name=file accept="audio/*" capture id="recorder">
         <br><br>
-        <h4>Inspect the audio, if you want</h4>
+        <h3>Play the audio, in case you want check.</h3>
         <audio id="player" controls></audio>
         <br><br>
-        <h4>Upload the audio</h4>
-        <input type=submit value="Upload your wav/mp3/ogg file">
+        <h3>Click the button to upload the audio.</h3>
+        <input type=submit value="Upload your wav/mp3 file">
       </form>
 
 

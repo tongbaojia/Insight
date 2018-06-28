@@ -39,7 +39,7 @@ app.config['SECRET_KEY'] = 'secret!'
 UPLOAD_FOLDER = topdir + 'Project/website/tmp/'
 ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'ogg'])
 ## uploading files
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
+app.config['MAX_CONTENT_LENGTH'] = 160 * 1024 * 1024 ## max 16 Mb
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
@@ -146,22 +146,23 @@ def mytext(name=None):
     for temp_name in infodic.keys():
         temp_time = "[" + "%.0f s" % atime  + "]  "
         atime   += infodic[temp_name]["duration"]
-        atext   +=  mytextdic[temp_name].capitalize() + ". "
-        outtext +=  temp_time + mytextdic[temp_name].capitalize() + ". "
+        cleanedtext = text_clean(mytextdic[temp_name])
+        atext   +=  cleanedtext.capitalize() + ". "
+        outtext +=  temp_time + cleanedtext.capitalize() + ". "
     
     ## summrization keywords; on atext the string
-    keytext = top_words(text_clean(atext))
+    keytext = top_words(atext, nwords=5)
     
     ## summrization sentence; on atext the string
     try:
-        sentence = summarize(atext, ratio=0.2, split=True)
+        sentence = summarize(atext, ratio=0.05, split=True)
     except ValueError:
-        sentence = ""
+        sentence = [atext.split(".")[0]]
 
     ## for key sentence, make it italice and underline
     for s in sentence:
         print(s)
-        outtext = outtext.replace(s, "<span style='background-color: #FFFF00'>" + s + "</span>")
+        outtext = outtext.replace(s, "<span style='background-color: #FF7F50'>" + s + "</span>")
     ## for key words, make it yellow
     for j in keytext:
         outtext = outtext.replace(j, "<u><i>" + j + "</i></u>")
