@@ -1,4 +1,4 @@
-# Project
+# Temp Project
 
-Welcome to the project information page!
+Welcome to the temp project page!
 

@@ -1,8 +1,11 @@
 # Insight
 
-## Data Science, Summer 2018
-## My project is at: http://meetingmemo.com
+## Data Science, Boston, summer 2018
 
-* Project has the main code for MeetingMemo
-* Test for all small tests
-* TempProj has future project skeletons
+## Go to my project webiste, [MeetingMemo](http://meetingmemo.com).
+
+## This directory contains: 
+
+* Project, has the main code for MeetingMemo
+* Test, for all small tests
+* TempProj, has future project skeletons
