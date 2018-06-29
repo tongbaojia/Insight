@@ -104,8 +104,12 @@ def mytext(name=None):
     tmpfiles += [str(i).replace(UPLOAD_FOLDER, "") for i in glob(UPLOAD_FOLDER + "*.ogg")]
     
     myaudio = ""
+    mynkeywords = 1
+    mynsentence = 0.0
     if request.method == 'POST':
         myaudio = UPLOAD_FOLDER + str(request.form.get('TranslateFile'))
+        mynkeywords = int(request.form.get('Nkeywords'))
+        mynsentence = float(request.form.get('Nsentences'))/100
         # if 'TestSample' in request.form:
         #     myaudio = UPLOAD_FOLDER + 'speech.wav'
         # else:
@@ -151,11 +155,11 @@ def mytext(name=None):
         outtext +=  temp_time + cleanedtext.capitalize() + ". "
     
     ## summrization keywords; on atext the string
-    keytext = top_words(atext, nwords=5)
+    keytext = top_words(atext, nwords=mynkeywords)
     
     ## summrization sentence; on atext the string
     try:
-        sentence = summarize(atext, ratio=0.2, split=True)
+        sentence = summarize(atext, ratio=mynsentence, split=True)
     except ValueError:
         sentence = [atext.split(".")[0]]
 
@@ -168,10 +172,8 @@ def mytext(name=None):
         outtext = outtext.replace(j, "<u><i><b>" + j + "</b></i></u>")
 
     ## convert outtext to a list again, with.
-    outtext = outtext.split(".")
+    outtext = [o + "." for o in outtext.split(".")][:-1]
 
-    # for k in outtext:
-    #     print(k)
     # for k in inputtasks:
     #     print(infodic[k]["duration"])
 
@@ -179,7 +181,6 @@ def mytext(name=None):
     ## audio_length = "%.1f sec" % infodic[myaudio]["duration"]
     audio_length = "%.1f sec" % atime
     return render_template("index_summary.html", output_text=keytext, output_sentence=sentence, original_text=outtext, audio_length=audio_length, tmpfiles=tmpfiles)
-
 
 if __name__ == '__main__':
     #socketio.run(app, debug=True, host='0.0.0.0')

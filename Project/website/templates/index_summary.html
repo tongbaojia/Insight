@@ -22,13 +22,39 @@
   <div align="center">
     <br>
     <h1>Audio to text summary</h1>
-    
+    <div class="form-container jumbotron" id-"sum-section">
+      <form class="form-inline well" id="mytext" method = "POST" action="\summary">
+        <div align="left" style="float: left; width: 50%;">
+          <h3>Choose an uploaded file to summarize</h3> 
+          <select name="TranslateFile" value="TranslateFile" style="width:200px;" >
+            {% for tmpfile in tmpfiles %}
+              <option value="{{ tmpfile }}">{{ tmpfile }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <!-- <audio id="player" controls></audio>
+        <script>
+            var player=document.getElementById('player');
+            var sourceMp3=document.getElementById('mytext');
+            sourceMp3.src= URL.createObjectURL('speech.wav');
+
+            player.load();
+            player.play(sourceMp3);
+        </script> -->
+        <div align="left" style="float: right; width: 50%;">
+          <h3> Choose your fraction of highlight: <input type="number" name="Nsentences" value="20" min="1" max="99" style="width:50px;display: inline;"></h3>
+          <h3> Choose your number of keyword: <input type="number" name="Nkeywords" value="5" min="1" max="100" style="width:50px;display: inline;"></h3>
+        </div>
+        <div align="center" style="float: left; width: 100%;">
+          <input type="submit" value="Translate">
+          <hr style=" height:12px;border:0;box-shadow:inset 0 12px 12px -12px rgba(0,102,204,0.5);">
+        </div>
+      </form>
+    </div>
+  </div>
+
+
   <div align="left" style="float: left; width: 48%;">
-      <center>
-      <h3>Click the Record/Upload button above for your own file</h3>
-      </center>
-      
-      <br><br><br><br>
       
       <h2><center>Highlight sentence</center></h2>
       <textbox class="display" name="output_sentence" id="output_sentence" maxlength="50000">
@@ -51,54 +77,15 @@
       </textbox>
   </div>
 
-  <div align="left" style="float: right; width: 48%;">
-    <div class="form-container jumbotron" id-"sum-section">
-      <form class="form-inline well" id="mytext" method = "POST" action="\summary">
-      <h3>Please choose a file to summarize</h3>
-      <select name="TranslateFile" value="TranslateFile" style="width:200px;">
-        {% for tmpfile in tmpfiles %}
-          <option value="{{ tmpfile }}">{{ tmpfile }}</option>
-        {% endfor %}
-      </select>
-      
-<!--       <audio id="player" controls></audio>
-      <script>
-        function loadSong(songNo) {
-          var player=document.getElementById('player');
-          var sourceMp3=document.getElementById('mytext');
-          sourceMp3.src= songNo;
 
-          player.load();
-          player.play();
-        }
-      </script> -->
 
-<!--       Number of keywords:
-      <select name="Nkeywords" value="Nkeywords" style="width:200px;">
-          <option value=3>3</option>
-          <option value=5>5</option>
-          <option value=7>7</option>
-      </select>
-      Fraction of highlights:
-      <select name="Nsentences" value="Nsentences" style="width:200px;">
-          <option value=0.1>0.1</option>
-          <option value=0.2>0.2</option>
-          <option value=0.3>0.3</option>
-      </select> -->
-      <br>
-      <input type="submit" value="Translate"></button>
-      </form>
-      <!-- <form id="mytext" method = "POST" action = "#" >
-        <input type="submit" name="Translate" value="Translate Live">
-        <input type="submit" name="TestSample" value="TestSample">
-      </form> -->
-    </div>
 
+<div align="left" style="float: right; width: 48%;">
     <h2><center>Full transcript</center></h2>
     <center><h4>Active audio length {{ audio_length }}</h4></center>
       <p style="text-align:left; font-family: Helvetica; font-size:18px">
       {% for sentence in original_text %}
-      {{ sentence|safe }}. <br>
+      {{ sentence|safe }} <br>
       {% endfor %}
       </p>
   </div>
