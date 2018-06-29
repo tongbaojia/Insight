@@ -97,7 +97,6 @@ def summaryindex():
     return render_template('index_summary.html', tmpfiles=tmpfiles)
 
 @app.route('/summary', methods=['GET', 'POST'])
-#@socketio.on('mytext', namespace='/test')
 def mytext(name=None):
 
     tmpfiles = [str(i).replace(UPLOAD_FOLDER, "") for i in glob(UPLOAD_FOLDER + "*.wav")]
