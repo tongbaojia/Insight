@@ -121,20 +121,21 @@ def mytext(name=None):
     inputtasks = infodic.keys() ## this is the ordered files
 
     mytextdic = {}
-    ## parallel
-    print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
-    npool = min(len(inputtasks), mp.cpu_count() - 2)
-    pool  = mp.Pool(npool)
-    results = pool.map(SoundToText, inputtasks)
-    pool.close()
-    pool.join()
-    for result in results:
-        mytextdic.update(result)
-    # # standard
-    # for j in inputtasks:
-    #     print(j)
-    #     result = SoundToText(j) #dictionary of values, plots
+    # ## parallel
+    # print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
+    # npool = min(len(inputtasks), mp.cpu_count() - 2)
+    # pool  = mp.Pool(npool)
+    # results = pool.map(SoundToText, inputtasks)
+    # pool.close()
+    # pool.join()
+    # for result in results:
     #     mytextdic.update(result)
+    # standard
+    for j in inputtasks:
+        print(j)
+        #result = SoundToText(j, useGoogle=True, path=topdir) #dictionary of values, plots
+        result = SoundToText(j) #dictionary of values, plots
+        mytextdic.update(result)
 
     ## clear the input files
     for k in inputtasks:

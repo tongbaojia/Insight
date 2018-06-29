@@ -72,7 +72,7 @@ def PrepareSound(file="", fixsplit=False, silencesplit=True):
     return info
 
 
-def SoundToText(file="", useGoogle=False):
+def SoundToText(file="", useGoogle=False, path="../"):
     '''Uses Sphinx builtin. 
     Input is a dic contained as config.
     Output is a dic with filename as key and text as content '''
@@ -95,10 +95,14 @@ def SoundToText(file="", useGoogle=False):
             ## https://cloud.google.com/speech-to-text/
             #text = Recon.recognize_google(test_au, language='en-US')
             ## only takes texts < 60 seconds!
-            f = open('tony-test-fa962b69f1fb.json', 'r')
+            f = open(path + 'Project/src/tony-test-fa962b69f1fb.json', 'r')
             #print(json.loads(f))
             GOOGLE_CLOUD_SPEECH_CREDENTIALS = f.read()
-            text = Recon.recognize_google_cloud(test_au, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
+            try:
+                text = Recon.recognize_google_cloud(test_au, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS)
+            except sr.UnknownValueError:
+                print("cannot recognize ", file)
+                text = ""
             f.close()
         
         del test
