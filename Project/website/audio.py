@@ -39,7 +39,7 @@ app.config['SECRET_KEY'] = 'secret!'
 UPLOAD_FOLDER = topdir + 'Project/website/tmp/'
 ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'ogg'])
 ## uploading files
-app.config['MAX_CONTENT_LENGTH'] = 160 * 1024 * 1024 ## max 16 Mb
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
@@ -123,6 +123,13 @@ def mytext(name=None):
 
     inputtasks = infodic.keys() ## this is the ordered files
 
+    ## move file to a sub directory; so it won't show up in the current dir
+    for k in inputtasks:
+        os.rename(k, k.replace("/tmp/", "/tmpsplit/"))
+    inputtasks = [k.replace("/tmp/", "/tmpsplit/") for k in inputtasks]
+
+
+
     mytextdic = {}
     # ## parallel
     # print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
@@ -150,7 +157,7 @@ def mytext(name=None):
     for temp_name in infodic.keys():
         temp_time = "[" + "%.0f s" % atime  + "]  "
         atime   += infodic[temp_name]["duration"]
-        cleanedtext = text_clean(mytextdic[temp_name])
+        cleanedtext = text_clean(mytextdic[temp_name.replace("/tmp/", "/tmpsplit/")])
         atext   +=  cleanedtext.capitalize() + ". "
         outtext +=  temp_time + cleanedtext.capitalize() + ". "
     
@@ -176,9 +183,9 @@ def mytext(name=None):
 
     # for k in inputtasks:
     #     print(infodic[k]["duration"])
-
     ## get audio length: full audio length with silence here!
     ## audio_length = "%.1f sec" % infodic[myaudio]["duration"]
+
     audio_length = "%.1f sec" % atime
     return render_template("index_summary.html", output_text=keytext, output_sentence=sentence, original_text=outtext, audio_length=audio_length, tmpfiles=tmpfiles)
 
