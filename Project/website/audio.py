@@ -2,8 +2,8 @@
 
 ## http://flask.pocoo.org/docs/1.0/quickstart/
 import sys
-topdir = '/Users/renormalization/Git/Insight/'
-#topdir = '/home/ubuntu/Insight/'
+#topdir = '/Users/renormalization/Git/Insight/'
+topdir = '/home/ubuntu/Insight/'
 #sys.path.insert(0, '/home/ubuntu/Insight/Project/src/')
 sys.path.insert(0, topdir + 'Project/src/')
 import os
@@ -39,7 +39,7 @@ app.config['SECRET_KEY'] = 'secret!'
 UPLOAD_FOLDER = topdir + 'Project/website/tmp/'
 ALLOWED_EXTENSIONS = set(['wav', 'mp3', 'ogg'])
 ## uploading files
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 ## max 16 Mb
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 ## max 16 Mb
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
