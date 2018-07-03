@@ -22,16 +22,18 @@
   <div align="center">
     <br>
     <h1>Audio to text summary</h1>
-    <div class="form-container jumbotron" id-"sum-section">
-      <form class="form-inline well" id="mytext" method = "POST" action="\summary">
-        <div align="left" style="float: left; width: 50%;">
-          <h3>Choose an uploaded file to summarize</h3> 
-          <select name="TranslateFile" value="TranslateFile" style="width:200px;" >
+    <div id="sum-section">
+      <form id="mytext" method = "POST" action="\summary">
+        <div align="left" style="float: left; width: 50%;" >
+          <h3>Click and choose an uploaded file to summarize</h3> 
+
+          <select name="TranslateFile" value="TranslateFile" style="width:200px;" class="select">
             {% for tmpfile in tmpfiles %}
               <option value="{{ tmpfile }}">{{ tmpfile }}</option>
             {% endfor %}
           </select>
-        </div>
+          </div>
+
         <!-- <audio id="player" controls></audio>
         <script>
             var player=document.getElementById('player');
@@ -56,7 +58,7 @@
 
   <div align="left" style="float: left; width: 48%;">
       
-      <h2><center>Highlight sentence</center></h2>
+      <h2><center>Highlight sentences</center></h2>
       <textbox class="display" name="output_sentence" id="output_sentence" maxlength="50000">
         <ul>
         {% for sentence in output_sentence %}

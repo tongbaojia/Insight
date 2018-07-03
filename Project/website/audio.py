@@ -131,7 +131,7 @@ def mytext(name=None):
 
 
     mytextdic = {}
-    # ## parallel
+    ## parallel
     # print(" Running %s jobs on %s cores" % (len(inputtasks), mp.cpu_count()-2))
     # npool = min(len(inputtasks), mp.cpu_count() - 2)
     # pool  = mp.Pool(npool)
@@ -158,6 +158,8 @@ def mytext(name=None):
         temp_time = "[" + "%.0f s" % atime  + "]  "
         atime   += infodic[temp_name]["duration"]
         cleanedtext = text_clean(mytextdic[temp_name.replace("/tmp/", "/tmpsplit/")])
+        if cleanedtext == "":
+            continue;
         atext   +=  cleanedtext.capitalize() + ". "
         outtext +=  temp_time + cleanedtext.capitalize() + ". "
     
@@ -167,6 +169,7 @@ def mytext(name=None):
     ## summrization sentence; on atext the string
     try:
         sentence = summarize(atext, ratio=mynsentence, split=True)
+        print(atext)
     except ValueError:
         sentence = [atext.split(".")[0]]
 

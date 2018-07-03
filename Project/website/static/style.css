@@ -1270,3 +1270,44 @@
         }
 
 /* Extra */
+
+.b-select-wrap {
+    height: 40px;
+    width: 240px;
+    border: 1px solid #e3e3e3;
+    color: #616263;
+    overflow: hidden;
+    position: relative;
+    border-radius: 3px;
+}
+
+.b-select-wrap:after {
+    content: "▼";
+    padding: 12px 8px;
+    position: absolute;
+    right: 10px;
+    top: 0;
+    z-index: 1;
+    text-align: center;
+    width: 10%;
+    height: 100%;
+    pointer-events: none;    
+}
+
+.b-select {
+    height: 40px;
+    width: 100%;
+    padding: 5px 15px;
+    background-color: #ececec;
+    border: 0;
+    outline: none;
+    font-size: 16px;
+    -webkit-appearance: none; /* for webkit browsers */
+    -moz-appearance: none; /* for firefox */
+    appearance: none; /* for modern browsers */
+}
+
+/* remove default caret for ie */
+.b-select::-ms-expand {
+   display:none;
+}
