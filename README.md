@@ -4,8 +4,8 @@
 
 ## Go to my project webiste, [MeetingMemo](http://meetingmemo.com).
 
-## This directory contains: 
+## The folders contains: 
 
-* Project, has the main code for MeetingMemo
+* **Project**, has the main code for MeetingMemo
 * Test, for all small tests
 * TempProj, has future project skeletons
