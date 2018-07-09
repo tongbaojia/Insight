@@ -9,10 +9,10 @@ Also supports keywords and full transcript.
 
 ## Structure
 
-* Data dir contains our data information;
-* Plot dir contains validation plots;
-* src contains the speech recognition and text processing code; all of them are in utils.py;
-* website dir contains the .html and .py for the webApp; to run it: python audio.py;
+* The Data folder contains our data information;
+* The Plot folder contains validation plots;
+* The src folder contains the speech recognition and text processing code; all of them are in utils.py;
+* The website folder contains the .html and .py for the webApp; to run it: python audio.py;
 
 For the notebooks:
 * Download(etc).ipynb shows the web-scraping and audio to conversion;
