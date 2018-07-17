@@ -141,7 +141,7 @@
     \def\gt{>}
     \def\lt{<}
     % Document parameters
-    \title{Tony\_Tong\_Employee\_Retention}
+    \title{Tony\_Tong\_Yammer}
     
     
     
@@ -280,141 +280,6 @@
     
 
     
-    \hypertarget{challenge-description}{%
-\subsection{Challenge Description}\label{challenge-description}}
-
-We got employee data from a few companies. We have data about all
-employees who joined from 2011/01/24 to 2015/12/13. For each employee,
-we also know if they are still at the company as of 2015/12/13 or they
-have quit. Beside that, we have general info about the employee, such as
-avg salary during her tenure, dept, and yrs of experience.
-
-As said above, the goal is to predict employee retention and understand
-its main drivers Hints: - What are the main factors that drive employee
-churn? Do they make sense? Explain your findings. - What might you be
-able to do for the company to address employee Churn, what would be
-follow-up actions? - If you could add to this data set just one variable
-that could help explain employee churn, what would that be? - Your
-output should be in the form a a jupyter notebook and pdf output of a
-jupyter notebook in which you specify your results and how you got them.
-
-Data The table is: ``employee\_retention'' - comprehensive information
-about employees. Columns: - employee\_id : id of the employee. Unique by
-employee per company - company\_id : company id. - dept : employee dept
-- seniority : number of yrs of work experience when hired - salary: avg
-yearly salary of the employee during her tenure within the company -
-join\_date: when the employee joined the company, it can only be between
-2011/01/24 and 2015/12/13 - quit\_date: when the employee left her job
-(if she is still employed as of 2015/12/13, this field is NA)
-
-    \hypertarget{my-discussions}{%
-\subsection{My Discussions}\label{my-discussions}}
-
-    \begin{itemize}
-\tightlist
-\item
-  The data preparation/feature engineering flows as the following:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Find the missing values: if the starting date is two years before
-    the last date of the data, fill the last date of the data as the NA
-    value, then drop NA;
-  \item
-    Convert depart name into categorical
-  \item
-    Get a working date as starting date - ending date; save in units of
-    months
-  \item
-    Split churn into two categories: drop before 17 month and drop after
-    17 month -- there is a clear separation
-  \item
-    salary and seniority are normalized;
-  \item
-    Add in feature month joined; Add in feature salary/seniority;
-  \item
-    Drop starting date, ending date, depart name,
-  \end{itemize}
-\item
-  Then the problem is treated as a classficiation problem.
-
-  \begin{itemize}
-  \tightlist
-  \item
-    The baseline is random;
-  \item
-    The metric is accuracy; predicting wether an employee will churn in
-    17 months or not
-  \item
-    The input features are 6: starting month, department, company,
-    salary, seniority, salary/seniority
-  \item
-    Methods tried are Logistic regression, Xgboost, Random forest,
-    Neural network, KNN
-  \item
-    The model is trained with 70\% of the data, validated with 15\% of
-    data, and tested on the 15\% data as reported.
-  \item
-    Most model behave around 53-58\% on the validation set, the best is
-    chosen as the XGboost model, with modest parameter tuning.
-  \end{itemize}
-\end{itemize}
-
-\hypertarget{answers-to-questions}{%
-\subsubsection{Answers to questions}\label{answers-to-questions}}
-
-\begin{itemize}
-\tightlist
-\item
-  What are the main factors that drive employee churn? Do they make
-  sense? Explain your findings.
-
-  \begin{itemize}
-  \tightlist
-  \item
-    The main ones are salary, seniority, and join month
-  \item
-    Higher the salary, the lower churn rate
-  \item
-    More senior, lower churn rate
-  \item
-    Join around Mar tends to have a lower churn rate than joining around
-    Aug
-  \end{itemize}
-\item
-  What might you be able to do for the company to address employee
-  Churn, what would be follow-up actions?
-
-  \begin{itemize}
-  \tightlist
-  \item
-    \textbf{I can predict the curn within 17 months or not, with 56\%
-    accuracy. This is evaluated on the test set.}
-  \item
-    I only learnt weakly, improving the baseline score by 6\%.
-  \end{itemize}
-\item
-  If you could add to this data set just one variable that could help
-  explain employee churn, what would that be?
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Ave hour at work
-  \item
-    Raise in salary over time
-  \item
-    Colleague rating
-  \item
-    I would also add in more data, right now the model is limited by the
-    information input
-  \end{itemize}
-\end{itemize}
-
-    \hypertarget{import-libraries}{%
-\subsection{Import libraries}\label{import-libraries}}
-
     \begin{Verbatim}[commandchars=\\\{\}]
 {\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k}{as} \PY{n+nn}{pd}
         \PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
@@ -431,568 +296,443 @@ join\_date: when the employee joined the company, it can only be between
 \end{Verbatim}
 
 
-    \hypertarget{data-inspection-eda}{%
-\subsection{Data inspection, EDA}\label{data-inspection-eda}}
+    \hypertarget{problem}{%
+\section{Problem}\label{problem}}
+
+See:
+https://docs.google.com/document/d/1JrWQk3fBPuydBjh6vJ-eQ0PoFlHixUxobpK\_LJoZu\_A/edit
+
+The head of the Product team walks over to your desk and asks you what
+you think about the latest activity on the user engagement dashboards.
+
+SQL code:
+
+\begin{verbatim}
+SELECT DATE_TRUNC('week', e.occurred_at),
+       COUNT(DISTINCT e.user_id) AS weekly_active_users
+  FROM tutorial.yammer_events e
+ WHERE e.event_type = 'engagement'
+   AND e.event_name = 'login'
+ GROUP BY 1
+ ORDER BY 1 
+\end{verbatim}
+
+    \hypertarget{quick-summary}{%
+\section{Quick Summary}\label{quick-summary}}
+
+\begin{itemize}
+\tightlist
+\item
+  More new users and new active users.
+\item
+  Login rate drops could due to people go on vacation; it is user type
+  dependent.
+\end{itemize}
+
+    \hypertarget{data}{%
+\section{Data}\label{data}}
+
+There are two time series data: Events and emails.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}2}]:} \PY{o}{!}ls Data
+{\color{incolor}In [{\color{incolor}2}]:} \PY{o}{!}ls Data/*.csv
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-TreeDiagram.png             employee\_retention\_data.csv
+Data/dimension\_rollup\_periods.csv Data/yammer\_events.csv
+Data/employee\_retention\_data.csv  Data/yammer\_users.csv
+Data/yammer\_emails.csv
 
     \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}3}]:} \PY{n}{df} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Data/employee\PYZus{}retention\PYZus{}data.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{df}\PY{o}{.}\PY{n}{info}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 24702 entries, 0 to 24701
-Data columns (total 7 columns):
-employee\_id    24702 non-null float64
-company\_id     24702 non-null int64
-dept           24702 non-null object
-seniority      24702 non-null int64
-salary         24702 non-null float64
-join\_date      24702 non-null object
-quit\_date      13510 non-null object
-dtypes: float64(2), int64(2), object(3)
-memory usage: 1.3+ MB
-
-    \end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}4}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} Clean the empty entries}
-        \PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{join\PYZus{}date} \PY{o}{\PYZlt{}} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{2013\PYZhy{}12\PYZhy{}13}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{\PYZam{}} 
-               \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{quit\PYZus{}date}\PY{o}{.}\PY{n}{isnull}\PY{p}{(}\PY{p}{)}\PY{p}{)}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{join\PYZus{}date} \PY{o}{\PYZlt{}} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{2013\PYZhy{}12\PYZhy{}13}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} 
-                                                 \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{quit\PYZus{}date}\PY{o}{.}\PY{n}{isnull}\PY{p}{(}\PY{p}{)}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{fillna}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{2015\PYZhy{}12\PYZhy{}13}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{dropna}\PY{p}{(}\PY{p}{)}
-        \PY{n}{df}\PY{o}{.}\PY{n}{info}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-<class 'pandas.core.frame.DataFrame'>
-Int64Index: 16632 entries, 0 to 24701
-Data columns (total 7 columns):
-employee\_id    16632 non-null float64
-company\_id     16632 non-null int64
-dept           16632 non-null object
-seniority      16632 non-null int64
-salary         16632 non-null float64
-join\_date      16632 non-null object
-quit\_date      16632 non-null object
-dtypes: float64(2), int64(2), object(3)
-memory usage: 1.0+ MB
-
-    \end{Verbatim}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}5}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} remove seniority outliers}
-        \PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{seniority} \PY{o}{\PYZgt{}} \PY{l+m+mi}{33}\PY{p}{)}\PY{p}{,} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{seniority}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]} \PY{o}{=} \PY{l+m+mi}{33}
-        \PY{n}{sns}\PY{o}{.}\PY{n}{violinplot}\PY{p}{(}\PY{n}{x}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{seniority}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{data}\PY{o}{=}\PY{n}{df}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}5}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x1117b3908>
-\end{Verbatim}
-            
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_9_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}6}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} make department categorical}
-        \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{dept\PYZus{}id}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{dept}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{category}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{o}{.}\PY{n}{cat}\PY{o}{.}\PY{n}{codes}
-        \PY{c+c1}{\PYZsh{}\PYZsh{} find all the departments}
-        \PY{n+nb}{print}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{dept}\PY{o}{.}\PY{n}{unique}\PY{p}{(}\PY{p}{)}\PY{p}{)}
-        \PY{n+nb}{print}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{dept\PYZus{}id}\PY{o}{.}\PY{n}{unique}\PY{p}{(}\PY{p}{)}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{clf}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{dept\PYZus{}id}\PY{p}{,} \PY{n}{bins}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{6}\PY{p}{,} \PY{l+m+mf}{0.5}\PY{p}{)}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{department ID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{counts}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-['customer\_service' 'marketing' 'data\_science' 'engineer' 'sales' 'design']
-[0 4 1 3 5 2]
-
-    \end{Verbatim}
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_10_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}7}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} find all the companies}
-        \PY{n+nb}{print}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{company\PYZus{}id}\PY{o}{.}\PY{n}{unique}\PY{p}{(}\PY{p}{)}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{clf}\PY{p}{(}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{company\PYZus{}id}\PY{p}{,} \PY{n}{bins}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{13}\PY{p}{,} \PY{l+m+mf}{0.5}\PY{p}{)}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{company ID}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{counts}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-[ 7  2  4  9  1  6 10  5  3  8 11 12]
-
-    \end{Verbatim}
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_11_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}8}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} convert datetime and get duration in months}
-        \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{quit\PYZus{}date}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}datetime}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{quit\PYZus{}date}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
-        \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{join\PYZus{}date}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}datetime}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{join\PYZus{}date}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{)}
-        \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}numeric}\PY{p}{(}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{quit\PYZus{}date}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} 
-                                        \PY{o}{\PYZhy{}} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{join\PYZus{}date}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{dt}\PY{o}{.}\PY{n}{days}\PY{p}{,} \PY{n}{downcast}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{integer}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{/}\PY{l+m+mi}{30}
-        \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{rint}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}
-        \PY{n}{df}\PY{o}{.}\PY{n}{head}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}8}]:}    employee\_id  company\_id              dept  seniority    salary  join\_date  \textbackslash{}
-        0      13021.0           7  customer\_service         28   89000.0 2014-03-24   
-        1     825355.0           7         marketing         20  183000.0 2013-04-29   
-        3     662910.0           7  customer\_service         20  115000.0 2012-05-14   
-        4     256971.0           2      data\_science         23  276000.0 2011-10-17   
-        5     509529.0           4      data\_science         14  165000.0 2012-01-30   
+{\color{incolor}In [{\color{incolor}3}]:} \PY{n}{df\PYZus{}user} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Data/yammer\PYZus{}users.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{}print(df\PYZus{}user.info())}
         
-           quit\_date  dept\_id  duration  
-        0 2015-10-30        0      20.0  
-        1 2014-04-04        4      11.0  
-        3 2013-06-07        0      13.0  
-        4 2014-08-22        1      35.0  
-        5 2013-08-30        1      19.0  
-\end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{join\PYZus{}month}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}numeric}\PY{p}{(}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{join\PYZus{}date}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{dt}\PY{o}{.}\PY{n}{month}\PY{p}{,} \PY{n}{downcast}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{integer}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{join\PYZus{}month}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{enrolled month}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{counts}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_13_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}10}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} clean extra columns}
-         \PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{employee\PYZus{}id}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
-         \PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{join\PYZus{}date}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{quit\PYZus{}date}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
-         \PY{n}{df} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{dept}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
+        \PY{n}{df\PYZus{}event} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Data/yammer\PYZus{}events.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{}print(df\PYZus{}event.info())}
+        
+        \PY{n}{df\PYZus{}email} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Data/yammer\PYZus{}emails.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{}print(df\PYZus{}email.info())}
+        
+        \PY{n}{df\PYZus{}period} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{read\PYZus{}csv}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Data/dimension\PYZus{}rollup\PYZus{}periods.csv}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{}print(df\PYZus{}period.info())}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}11}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} clean seniroity and salary data}
-         \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{preprocessing} \PY{k}{import} \PY{n}{StandardScaler}
-         \PY{n}{scaler} \PY{o}{=} \PY{n}{StandardScaler}\PY{p}{(}\PY{p}{)}
-         \PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{seniority}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{salary}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]} \PY{o}{=} \PY{n}{scaler}\PY{o}{.}\PY{n}{fit\PYZus{}transform}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{seniority}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{salary}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}\PY{p}{)}
-         \PY{c+c1}{\PYZsh{} \PYZsh{}\PYZsh{} rescale seniority and salary based on department}
-         \PY{c+c1}{\PYZsh{} for i\PYZus{}id in df.dept\PYZus{}id.unique(): }
-         \PY{c+c1}{\PYZsh{}     df.loc[(df.dept\PYZus{}id == i\PYZus{}id), }
-         \PY{c+c1}{\PYZsh{}            [\PYZsq{}seniority\PYZsq{}, \PYZsq{}salary\PYZsq{}]] = scaler.fit\PYZus{}transform(df.loc[df.dept\PYZus{}id == i\PYZus{}id, [\PYZsq{}seniority\PYZsq{}, \PYZsq{}salary\PYZsq{}]])}
-         \PY{c+c1}{\PYZsh{}     \PYZsh{}for k\PYZus{}id in df.company\PYZus{}id.unique():}
-         \PY{c+c1}{\PYZsh{}         \PYZsh{}df.loc[(df.dept\PYZus{}id == i\PYZus{}id) \PYZam{} (df.company\PYZus{}id == k\PYZus{}id) , [\PYZsq{}seniority\PYZsq{}, \PYZsq{}salary\PYZsq{}]] = scaler.fit\PYZus{}transform(df.loc[(df.dept\PYZus{}id == i\PYZus{}id) \PYZam{} (df.company\PYZus{}id == k\PYZus{}id) , [\PYZsq{}seniority\PYZsq{}, \PYZsq{}salary\PYZsq{}]])}
-         \PY{n}{df}\PY{o}{.}\PY{n}{describe}\PY{p}{(}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}4}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} limit the period to the current time}
+        \PY{n}{df\PYZus{}period} \PY{o}{=} \PY{n}{df\PYZus{}period}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{n}{df\PYZus{}period}\PY{o}{.}\PY{n}{time\PYZus{}id} \PY{o}{\PYZlt{}} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{2014\PYZhy{}09\PYZhy{}01}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
 \end{Verbatim}
 
 
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}11}]:}          company\_id     seniority        salary       dept\_id      duration  \textbackslash{}
-         count  16632.000000  1.663200e+04  1.663200e+04  16632.000000  16632.000000   
-         mean       3.436929  6.274709e-17  3.169729e-16      1.958574     23.217412   
-         std        2.706249  1.000030e+00  1.000030e+00      1.864615     11.934904   
-         min        1.000000 -1.637585e+00 -1.615410e+00      0.000000      3.000000   
-         25\%        1.000000 -8.883227e-01 -7.858107e-01      0.000000     12.000000   
-         50\%        2.000000 -1.418307e-02 -1.970627e-01      1.000000     22.000000   
-         75\%        5.000000  8.599565e-01  6.459174e-01      4.000000     32.000000   
-         max       12.000000  2.358482e+00  3.616419e+00      5.000000     59.000000   
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}5}]:} \PY{c+c1}{\PYZsh{}df\PYZus{}user.tail()}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}6}]:} \PY{c+c1}{\PYZsh{}df\PYZus{}period.tail()}
+\end{Verbatim}
+
+
+    First event is at 2014-05-02
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}7}]:} \PY{c+c1}{\PYZsh{}df\PYZus{}event.head()}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}8}]:} \PY{c+c1}{\PYZsh{} print(df\PYZus{}event.event\PYZus{}type.unique())}
+        \PY{c+c1}{\PYZsh{} print(df\PYZus{}event.event\PYZus{}name.unique())}
+        \PY{c+c1}{\PYZsh{} print(df\PYZus{}email.action.unique())}
+        \PY{c+c1}{\PYZsh{} print(df\PYZus{}event.device.unique())}
+        \PY{c+c1}{\PYZsh{} print(df\PYZus{}event.user\PYZus{}type.unique())}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}9}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} convert occured\PYZus{}at to datetime}
+        \PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{occurred\PYZus{}at} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}datetime}\PY{p}{(}\PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{occurred\PYZus{}at}\PY{p}{)}
+        \PY{n}{df\PYZus{}event}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{nweek}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{occurred\PYZus{}at}\PY{o}{.}\PY{n}{dt}\PY{o}{.}\PY{n}{week} \PY{c+c1}{\PYZsh{}strftime(\PYZsq{}\PYZpc{}Y\PYZhy{}\PYZpc{}U\PYZsq{})}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}10}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} convert occured\PYZus{}at to datetime}
+         \PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{occurred\PYZus{}at} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}datetime}\PY{p}{(}\PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{occurred\PYZus{}at}\PY{p}{)}
+         \PY{n}{df\PYZus{}email}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{nweek}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{occurred\PYZus{}at}\PY{o}{.}\PY{n}{dt}\PY{o}{.}\PY{n}{week} \PY{c+c1}{\PYZsh{}strftime(\PYZsq{}\PYZpc{}Y\PYZhy{}\PYZpc{}U\PYZsq{})}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}11}]:} \PY{c+c1}{\PYZsh{}df\PYZus{}email.tail()}
+\end{Verbatim}
+
+
+    \hypertarget{eda}{%
+\section{EDA}\label{eda}}
+
+\begin{itemize}
+\tightlist
+\item
+  From events we can reproduce the plot from SQL.
+\item
+  From emails we can generate similar plots from actions.
+\end{itemize}
+
+It is interesting that the email opened by unique ID is increasing --
+which means more user activity; but emails that have blinks being
+clicked has the same trend as the login trend.
+
+This suggests that the users are likely to be on vacation -- reading it
+but not logging in.
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}12}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} event type can also be signup\PYZus{}flow}
+         \PY{n}{df\PYZus{}event\PYZus{}login} \PY{o}{=} \PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{event\PYZus{}type} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{engagement}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{event\PYZus{}name} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{login}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{]}
+         \PY{n}{df\PYZus{}event\PYZus{}send} \PY{o}{=} \PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{event\PYZus{}type} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{engagement}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)} \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{event\PYZus{}name} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{send\PYZus{}message}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{]}
          
-                  join\_month  
-         count  16632.000000  
-         mean       6.462662  
-         std        3.394163  
-         min        1.000000  
-         25\%        4.000000  
-         50\%        6.000000  
-         75\%        9.000000  
-         max       12.000000  
-\end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}12}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} check the duraiton distribution}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{clf}\PY{p}{(}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{duration}\PY{p}{,} \PY{n}{bins}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{60}\PY{p}{,} \PY{l+m+mf}{0.5}\PY{p}{)}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration in months}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{counts}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_16_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}13}]:} \PY{c+c1}{\PYZsh{} \PYZsh{}\PYZsh{} DBSCAN cluster}
-         \PY{c+c1}{\PYZsh{} from sklearn.cluster import DBSCAN}
-         \PY{c+c1}{\PYZsh{} dbscan = DBSCAN()}
-         
-         \PY{c+c1}{\PYZsh{} \PYZsh{} Fitting}
-         \PY{c+c1}{\PYZsh{} db = dbscan.fit(df.duration.values.reshape(\PYZhy{}1, 1))}
-         \PY{c+c1}{\PYZsh{} labels = db.labels\PYZus{}}
-         \PY{c+c1}{\PYZsh{} labels}
-         
-         \PY{c+c1}{\PYZsh{}\PYZsh{} descrete duration based on this distribution}
-         \PY{c+c1}{\PYZsh{}\PYZsh{} two categories, early quit less than 1.5 years, or at least 2 years}
-         \PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}}\PY{o}{=} \PY{l+m+mi}{0}\PY{p}{)} \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZlt{}}\PY{o}{=} \PY{l+m+mi}{17}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}     \PY{o}{=} \PY{l+m+mi}{0}
-         \PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{\PYZgt{}} \PY{l+m+mi}{17}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}                              \PY{o}{=} \PY{l+m+mi}{1}
-         \PY{c+c1}{\PYZsh{}df.loc[(df[\PYZsq{}duration\PYZsq{}] \PYZgt{} 17) \PYZam{} (df[\PYZsq{}duration\PYZsq{}] \PYZlt{}= 30), \PYZsq{}duration\PYZsq{}]     = 1}
-         \PY{c+c1}{\PYZsh{}df.loc[(df[\PYZsq{}duration\PYZsq{}] \PYZgt{}= 30), \PYZsq{}duration\PYZsq{}]                             = 2}
-         \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{astype}\PY{p}{(}\PY{n+nb}{int}\PY{p}{)}
+         \PY{c+c1}{\PYZsh{}\PYZsh{} event type can also be signup\PYZus{}flow}
+         \PY{n}{df\PYZus{}email\PYZus{}click} \PY{o}{=} \PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{action} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{email\PYZus{}clickthrough}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{]}
+         \PY{n}{df\PYZus{}email\PYZus{}open} \PY{o}{=} \PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{action} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{email\PYZus{}open}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{]}
+         \PY{n}{df\PYZus{}email\PYZus{}digest} \PY{o}{=} \PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{action} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{sent\PYZus{}weekly\PYZus{}digest}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{]}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}14}]:} \PY{c+c1}{\PYZsh{}\PYZsh{}\PYZsh{} keep only one company}
-         \PY{c+c1}{\PYZsh{} df = df.loc[(df[\PYZsq{}company\PYZus{}id\PYZsq{}] == 1) \PYZam{} (df[\PYZsq{}dept\PYZus{}id\PYZsq{}] == 1)]}
-         
-         \PY{c+c1}{\PYZsh{}\PYZsh{} keep only one department}
-         \PY{c+c1}{\PYZsh{}\PYZsh{} df = df.loc[(df[\PYZsq{}dept\PYZus{}id\PYZsq{}] == 3)]}
+{\color{incolor}In [{\color{incolor}13}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} create my data frame; sorted by each week and activities}
+         \PY{n}{my\PYZus{}df} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{login}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}event\PYZus{}login}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{send\PYZus{}message}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}event\PYZus{}send}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{email\PYZus{}open}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}email\PYZus{}open}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{email\PYZus{}clickthrough}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}email\PYZus{}click}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{c+c1}{\PYZsh{}my\PYZus{}df[\PYZdq{}email\PYZus{}digest\PYZdq{}] = df\PYZus{}email\PYZus{}digest.groupby(\PYZsq{}nweek\PYZsq{})[\PYZsq{}user\PYZus{}id\PYZsq{}].nunique()}
+         \PY{c+c1}{\PYZsh{}my\PYZus{}df.head()}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}15}]:} \PY{c+c1}{\PYZsh{}sns.jointplot(x=\PYZdq{}salary\PYZdq{}, y=\PYZdq{}seniority\PYZdq{}, data=df.loc[(df[\PYZsq{}duration\PYZsq{}] == 0)])}
-         \PY{c+c1}{\PYZsh{}sns.jointplot(x=\PYZdq{}salary\PYZdq{}, y=\PYZdq{}seniority\PYZdq{}, data=df.loc[(df[\PYZsq{}duration\PYZsq{}] == 1)])}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}16}]:} \PY{n}{plt}\PY{o}{.}\PY{n}{clf}\PY{p}{(}\PY{p}{)}
-         \PY{n}{n}\PY{p}{,} \PY{n}{bins}\PY{p}{,} \PY{n}{patches} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{salary}\PY{p}{)}\PY{o}{/}\PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{0}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{seniority}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.5}\PY{p}{,} \PY{n}{bins}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{o}{\PYZhy{}}\PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{,} \PY{n}{density}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{short}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{salary}\PY{p}{)}\PY{o}{/}\PY{n}{df}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{df}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{duration}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{seniority}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.5}\PY{p}{,} \PY{n}{density}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{bins}\PY{o}{=}\PY{n}{bins}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{long}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{salary/seniority}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-         
-         \PY{c+c1}{\PYZsh{}print(df.shape)}
-         \PY{c+c1}{\PYZsh{}df.head()}
-         \PY{c+c1}{\PYZsh{}df = df.drop([\PYZdq{}company\PYZus{}id\PYZdq{}, \PYZdq{}dept\PYZus{}id\PYZdq{}], axis=1)}
-         \PY{n}{df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{sal\PYZus{}seninor}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{p}{(}\PY{n}{df}\PY{o}{.}\PY{n}{salary}\PY{p}{)}\PY{o}{/}\PY{n}{df}\PY{o}{.}\PY{n}{seniority}
-         \PY{n}{df}\PY{o}{.}\PY{n}{describe}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_20_0.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}16}]:}          company\_id     seniority        salary       dept\_id      duration  \textbackslash{}
-         count  16632.000000  1.663200e+04  1.663200e+04  16632.000000  16632.000000   
-         mean       3.436929  6.274709e-17  3.169729e-16      1.958574      0.557359   
-         std        2.706249  1.000030e+00  1.000030e+00      1.864615      0.496714   
-         min        1.000000 -1.637585e+00 -1.615410e+00      0.000000      0.000000   
-         25\%        1.000000 -8.883227e-01 -7.858107e-01      0.000000      0.000000   
-         50\%        2.000000 -1.418307e-02 -1.970627e-01      1.000000      1.000000   
-         75\%        5.000000  8.599565e-01  6.459174e-01      4.000000      1.000000   
-         max       12.000000  2.358482e+00  3.616419e+00      5.000000      1.000000   
-         
-                  join\_month   sal\_seninor  
-         count  16632.000000  16632.000000  
-         mean       6.462662      1.602277  
-         std        3.394163      9.709842  
-         min        1.000000   -101.203402  
-         25\%        4.000000     -0.215252  
-         50\%        6.000000      0.690472  
-         75\%        9.000000      1.319599  
-         max       12.000000     88.424647  
-\end{Verbatim}
-            
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}17}]:} \PY{n}{sns}\PY{o}{.}\PY{n}{violinplot}\PY{p}{(}\PY{n}{x}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{y}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{sal\PYZus{}seninor}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{data}\PY{o}{=}\PY{n}{df}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{500}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}17}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x1a26b267b8>
-\end{Verbatim}
-            
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_21_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}18}]:} \PY{n}{sns}\PY{o}{.}\PY{n}{violinplot}\PY{p}{(}\PY{n}{x}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{y}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{join\PYZus{}month}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{data}\PY{o}{=}\PY{n}{df}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{500}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}18}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x1a21223be0>
-\end{Verbatim}
-            
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_22_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}19}]:} \PY{n}{sns}\PY{o}{.}\PY{n}{violinplot}\PY{p}{(}\PY{n}{x}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}  \PY{n}{y}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{salary}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}  \PY{n}{data}\PY{o}{=}\PY{n}{df}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{3000}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}19}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x1a21798908>
-\end{Verbatim}
-            
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_23_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}20}]:} \PY{n}{sns}\PY{o}{.}\PY{n}{violinplot}\PY{p}{(}\PY{n}{x}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}  \PY{n}{y}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{seniority}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}  \PY{n}{data}\PY{o}{=}\PY{n}{df}\PY{p}{[}\PY{p}{:}\PY{l+m+mi}{3000}\PY{p}{]}\PY{p}{)}
-\end{Verbatim}
-
-
-\begin{Verbatim}[commandchars=\\\{\}]
-{\color{outcolor}Out[{\color{outcolor}20}]:} <matplotlib.axes.\_subplots.AxesSubplot at 0x1a21e3c5f8>
-\end{Verbatim}
-            
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_24_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}21}]:} \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{model\PYZus{}selection} \PY{k}{import} \PY{n}{train\PYZus{}test\PYZus{}split}
-         
-         \PY{k}{def} \PY{n+nf}{pack\PYZus{}data}\PY{p}{(}\PY{n}{df}\PY{p}{,} \PY{n}{keyword}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{split}\PY{o}{=}\PY{l+m+mf}{0.15}\PY{p}{,} \PY{n}{shuffle}\PY{o}{=}\PY{k+kc}{True}\PY{p}{,} \PY{n}{SEED} \PY{o}{=} \PY{l+m+mi}{24}\PY{p}{)}\PY{p}{:}
-             \PY{l+s+sd}{\PYZsq{}\PYZsq{}\PYZsq{}For training preparation:}
-         \PY{l+s+sd}{    split data, and return a dictionary, }
-         \PY{l+s+sd}{    containing training, testing and validation}
-         \PY{l+s+sd}{    seed for reproducibility}
-         \PY{l+s+sd}{    \PYZsq{}\PYZsq{}\PYZsq{}}
-             \PY{n}{data} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
-             \PY{n}{df\PYZus{}X} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{n}{keyword}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{p}{)}
-             \PY{n}{df\PYZus{}y} \PY{o}{=} \PY{n}{df}\PY{p}{[}\PY{n}{keyword}\PY{p}{]}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{p}{)}
-             \PY{n}{X\PYZus{}train}\PY{p}{,} \PY{n}{X\PYZus{}test}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}test} \PY{o}{=} \PY{n}{train\PYZus{}test\PYZus{}split}\PY{p}{(}\PY{n}{df\PYZus{}X}\PY{p}{,} \PY{n}{df\PYZus{}y}\PY{p}{,} \PY{n}{train\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{1} \PY{o}{\PYZhy{}} \PY{n}{split}\PY{p}{,} \PY{n}{test\PYZus{}size}\PY{o}{=}\PY{n}{split}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{n}{SEED}\PY{p}{,} \PY{n}{shuffle}\PY{o}{=}\PY{n}{shuffle}\PY{p}{)}
-             \PY{n}{X\PYZus{}train}\PY{p}{,} \PY{n}{X\PYZus{}val}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}val} \PY{o}{=} \PY{n}{train\PYZus{}test\PYZus{}split}\PY{p}{(}\PY{n}{X\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{,} \PY{n}{train\PYZus{}size}\PY{o}{=}\PY{l+m+mi}{1} \PY{o}{\PYZhy{}} \PY{n}{split}\PY{p}{,} \PY{n}{test\PYZus{}size}\PY{o}{=}\PY{n}{split}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{n}{SEED}\PY{p}{,} \PY{n}{shuffle}\PY{o}{=}\PY{n}{shuffle}\PY{p}{)}
-             \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{X\PYZus{}train}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{X\PYZus{}train}\PY{o}{.}\PY{n}{values}
-             \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y\PYZus{}train}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{y\PYZus{}train}\PY{o}{.}\PY{n}{values}
-             \PY{c+c1}{\PYZsh{}print(data[\PYZdq{}y\PYZus{}train\PYZdq{}])}
-             \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{X\PYZus{}val}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}   \PY{o}{=} \PY{n}{X\PYZus{}val}\PY{o}{.}\PY{n}{values}
-             \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y\PYZus{}val}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}   \PY{o}{=} \PY{n}{y\PYZus{}val}\PY{o}{.}\PY{n}{values}
-             \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{X\PYZus{}test}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}  \PY{o}{=} \PY{n}{X\PYZus{}test}\PY{o}{.}\PY{n}{values}
-             \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y\PYZus{}test}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}  \PY{o}{=} \PY{n}{y\PYZus{}test}\PY{o}{.}\PY{n}{values}
-             \PY{k}{return} \PY{n}{data}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}22}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} get data}
-         \PY{n}{data} \PY{o}{=} \PY{n}{pack\PYZus{}data}\PY{p}{(}\PY{n}{df}\PY{p}{)}
-         \PY{n}{y\PYZus{}train}  \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y\PYZus{}train}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
-         \PY{n}{x\PYZus{}train}  \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{X\PYZus{}train}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{c+c1}{\PYZsh{} Creates an array of the train data}
-         \PY{n}{x\PYZus{}val}    \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{X\PYZus{}val}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{c+c1}{\PYZsh{} Creats an array of the val data}
-         \PY{n}{y\PYZus{}val}    \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y\PYZus{}val}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{c+c1}{\PYZsh{} Creats an array of the val data}
-         \PY{n}{x\PYZus{}test}    \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{X\PYZus{}test}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{c+c1}{\PYZsh{} Creats an array of the test data}
-         \PY{n}{y\PYZus{}test}    \PY{o}{=} \PY{n}{data}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{y\PYZus{}test}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{c+c1}{\PYZsh{} Creats an array of the test data}
-\end{Verbatim}
-
-
-    \hypertarget{setup-model-train-and-validation-pipeline}{%
-\subsection{Setup model train and validation
-pipeline}\label{setup-model-train-and-validation-pipeline}}
-
-\hypertarget{decide-to-use-accuracy-as-the-metric-with-ruc-area-as-a-help}{%
-\subsubsection{Decide to use accuracy as the metric, with RUC area as a
-help}\label{decide-to-use-accuracy-as-the-metric-with-ruc-area-as-a-help}}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}23}]:} \PY{k}{def} \PY{n+nf}{train\PYZus{}valmodel}\PY{p}{(}\PY{n}{model}\PY{p}{)}\PY{p}{:}
-             \PY{n}{model}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{x\PYZus{}train}\PY{p}{,} \PY{n}{y\PYZus{}train}\PY{p}{)}
-             \PY{c+c1}{\PYZsh{}\PYZsh{} print(\PYZdq{}train\PYZdq{}, metrics.classification\PYZus{}report(y\PYZus{}train, model.predict(x\PYZus{}train)))}
-             \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{train acc }\PY{l+s+si}{\PYZpc{}.3f}\PY{l+s+s2}{\PYZdq{}} \PY{o}{\PYZpc{}} \PY{n}{metrics}\PY{o}{.}\PY{n}{accuracy\PYZus{}score}\PY{p}{(}\PY{n}{y\PYZus{}train}\PY{p}{,} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{x\PYZus{}train}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-             \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{val acc }\PY{l+s+si}{\PYZpc{}.3f}\PY{l+s+s2}{\PYZdq{}} \PY{o}{\PYZpc{}} \PY{n}{metrics}\PY{o}{.}\PY{n}{accuracy\PYZus{}score}\PY{p}{(}\PY{n}{y\PYZus{}val}\PY{p}{,} \PY{n}{model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{x\PYZus{}val}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-             \PY{n}{probas\PYZus{}} \PY{o}{=} \PY{n}{model}\PY{o}{.}\PY{n}{predict\PYZus{}proba}\PY{p}{(}\PY{n}{x\PYZus{}val}\PY{p}{)}
-             \PY{c+c1}{\PYZsh{} Compute ROC curve and area the curve}
-             \PY{n}{fpr}\PY{p}{,} \PY{n}{tpr}\PY{p}{,} \PY{n}{thresholds} \PY{o}{=} \PY{n}{metrics}\PY{o}{.}\PY{n}{roc\PYZus{}curve}\PY{p}{(}\PY{n}{y\PYZus{}val}\PY{p}{,} \PY{n}{probas\PYZus{}}\PY{p}{[}\PY{p}{:}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
-             \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{fpr}\PY{p}{,} \PY{n}{tpr}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.8}\PY{p}{)}
-             \PY{n}{plt}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{lw}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.8}\PY{p}{)}
-             \PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{fasle positive rate}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-             \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{true positive rate}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-             \PY{n}{plt}\PY{o}{.}\PY{n}{text}\PY{p}{(}\PY{l+m+mf}{0.7}\PY{p}{,} \PY{o}{.}\PY{l+m+mi}{25}\PY{p}{,} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{ROC area: }\PY{l+s+si}{\PYZpc{}.3f}\PY{l+s+s2}{\PYZdq{}} \PY{o}{\PYZpc{}} \PY{n}{metrics}\PY{o}{.}\PY{n}{auc}\PY{p}{(}\PY{n}{fpr}\PY{p}{,} \PY{n}{tpr}\PY{p}{)}\PY{p}{)}
-             \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}24}]:} \PY{n}{lr} \PY{o}{=} \PY{n}{LogisticRegression}\PY{p}{(}\PY{p}{)}
-         \PY{n}{train\PYZus{}valmodel}\PY{p}{(}\PY{n}{lr}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-train acc 0.555
-val acc 0.555
-
-    \end{Verbatim}
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_29_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}25}]:} \PY{n}{xgbC} \PY{o}{=} \PY{n}{xgb}\PY{o}{.}\PY{n}{XGBClassifier}\PY{p}{(}\PY{n}{max\PYZus{}depth}\PY{o}{=}\PY{l+m+mi}{5}\PY{p}{,} \PY{n}{n\PYZus{}estimators}\PY{o}{=}\PY{l+m+mi}{10}\PY{p}{,} \PY{n}{learning\PYZus{}rate}\PY{o}{=}\PY{l+m+mf}{0.001}\PY{p}{,} \PY{n}{gamma}\PY{o}{=}\PY{l+m+mf}{0.001}\PY{p}{,} \PY{n}{subsample}\PY{o}{=}\PY{l+m+mf}{0.6}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}
-         \PY{n}{train\PYZus{}valmodel}\PY{p}{(}\PY{n}{xgbC}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{bar}\PY{p}{(}\PY{n+nb}{range}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{xgbC}\PY{o}{.}\PY{n}{feature\PYZus{}importances\PYZus{}}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{n}{xgbC}\PY{o}{.}\PY{n}{feature\PYZus{}importances\PYZus{}}\PY{p}{)}
-         \PY{n}{cols} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{drop}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{duration}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{values}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{xticks}\PY{p}{(}\PY{n}{np}\PY{o}{.}\PY{n}{arange}\PY{p}{(}\PY{n+nb}{len}\PY{p}{(}\PY{n}{cols}\PY{p}{)}\PY{p}{)}\PY{p}{,} \PY{n}{cols}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{importance of feature}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-train acc 0.576
-val acc 0.575
-
-    \end{Verbatim}
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_30_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_30_2.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}26}]:} \PY{n}{rf} \PY{o}{=} \PY{n}{RandomForestClassifier}\PY{p}{(}\PY{n}{max\PYZus{}depth}\PY{o}{=}\PY{l+m+mi}{4}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{,} \PY{n}{n\PYZus{}estimators}\PY{o}{=}\PY{l+m+mi}{200}\PY{p}{)}
-         \PY{n}{train\PYZus{}valmodel}\PY{p}{(}\PY{n}{rf}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-train acc 0.576
-val acc 0.576
-
-    \end{Verbatim}
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_31_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}27}]:} \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{neural\PYZus{}network} \PY{k}{import} \PY{n}{MLPClassifier} \PY{c+c1}{\PYZsh{}\PYZsh{} NN}
-         \PY{n}{nn} \PY{o}{=}  \PY{n}{MLPClassifier}\PY{p}{(}\PY{n}{hidden\PYZus{}layer\PYZus{}sizes}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{100}\PY{p}{,} \PY{l+m+mi}{20}\PY{p}{,} \PY{l+m+mi}{5}\PY{p}{,} \PY{p}{)}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mi}{1}\PY{p}{)}
-         \PY{n}{train\PYZus{}valmodel}\PY{p}{(}\PY{n}{nn}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-train acc 0.558
-val acc 0.557
-
-    \end{Verbatim}
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_32_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}28}]:} \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{naive\PYZus{}bayes} \PY{k}{import} \PY{n}{GaussianNB}
-         \PY{n}{nb} \PY{o}{=} \PY{n}{GaussianNB}\PY{p}{(}\PY{p}{)}
-         \PY{n}{train\PYZus{}valmodel}\PY{p}{(}\PY{n}{nb}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-train acc 0.559
-val acc 0.548
-
-    \end{Verbatim}
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_33_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}29}]:} \PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{neighbors} \PY{k}{import} \PY{n}{KNeighborsClassifier}
-         \PY{n}{knn} \PY{o}{=}  \PY{n}{KNeighborsClassifier}\PY{p}{(}\PY{l+m+mi}{90}\PY{p}{)}
-         \PY{n}{train\PYZus{}valmodel}\PY{p}{(}\PY{n}{knn}\PY{p}{)}
-\end{Verbatim}
-
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-train acc 0.582
-val acc 0.554
-
-    \end{Verbatim}
-
-    \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_34_1.png}
-    \end{center}
-    { \hspace*{\fill} \\}
-    
-    \hypertarget{test-result}{%
-\subsection{Test result}\label{test-result}}
-
-    \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}30}]:} \PY{n}{chosen\PYZus{}model} \PY{o}{=} \PY{n}{xgbC}
-         \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{test acc }\PY{l+s+si}{\PYZpc{}.3f}\PY{l+s+s2}{\PYZdq{}} \PY{o}{\PYZpc{}} \PY{n}{metrics}\PY{o}{.}\PY{n}{accuracy\PYZus{}score}\PY{p}{(}\PY{n}{y\PYZus{}test}\PY{p}{,} \PY{n}{chosen\PYZus{}model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{x\PYZus{}test}\PY{p}{)}\PY{p}{)}\PY{p}{)}
-         
-         \PY{n}{plt}\PY{o}{.}\PY{n}{clf}\PY{p}{(}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{n}{y\PYZus{}test}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{true}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n}{plt}\PY{o}{.}\PY{n}{hist}\PY{p}{(}\PY{n}{chosen\PYZus{}model}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{x\PYZus{}test}\PY{p}{)}\PY{p}{,} \PY{n}{alpha}\PY{o}{=}\PY{l+m+mf}{0.5}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{pred}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}14}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} reproduce plot in python}
+         \PY{n}{my\PYZus{}df}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Nuser}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
          \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
          \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
 \end{Verbatim}
 
 
-    \begin{Verbatim}[commandchars=\\\{\}]
-test acc 0.558
-
-    \end{Verbatim}
-
     \begin{center}
-    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_36_1.png}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_18_0.png}
     \end{center}
     { \hspace*{\fill} \\}
     
+    It is very interesting that the email open rate rises and email click
+through rate drops, in particular.
+
+    \hypertarget{model}{%
+\section{Model}\label{model}}
+
+\hypertarget{to-support-the-vacation-hypothesis-we-need-to-have-two-informations}{%
+\subsubsection{To support the vacation hypothesis, we need to have two
+informations:}\label{to-support-the-vacation-hypothesis-we-need-to-have-two-informations}}
+
+\begin{itemize}
+\tightlist
+\item
+  Number of registered user is increasing
+\item
+  User last activity and location
+\end{itemize}
+
+The first information can come from the user table
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}15}]:} \PY{c+c1}{\PYZsh{}df\PYZus{}user.head()}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}16}]:} \PY{c+c1}{\PYZsh{}df\PYZus{}user.info()}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}17}]:} \PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{created\PYZus{}at} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}datetime}\PY{p}{(}\PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{created\PYZus{}at}\PY{p}{)}
+         \PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{activated\PYZus{}at} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{to\PYZus{}datetime}\PY{p}{(}\PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{activated\PYZus{}at}\PY{p}{)}
+         
+         \PY{c+c1}{\PYZsh{}\PYZsh{} keep users created after 2014\PYZhy{}05\PYZhy{}02}
+         \PY{c+c1}{\PYZsh{}df\PYZus{}user = df\PYZus{}user.loc[df\PYZus{}user.created\PYZus{}at \PYZgt{} \PYZsq{}2014\PYZhy{}05\PYZhy{}01\PYZsq{}]}
+         
+         \PY{c+c1}{\PYZsh{}\PYZsh{} convert date into weeks}
+         \PY{n}{df\PYZus{}user}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{nweek\PYZus{}create}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{created\PYZus{}at}\PY{o}{.}\PY{n}{dt}\PY{o}{.}\PY{n}{week}
+         \PY{n}{df\PYZus{}user}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{nweek\PYZus{}active}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}   \PY{o}{=} \PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{activated\PYZus{}at}\PY{o}{.}\PY{n}{dt}\PY{o}{.}\PY{n}{week}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}18}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} Add them to my df}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}create}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek\PYZus{}create}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}active}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek\PYZus{}active}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}19}]:} \PY{c+c1}{\PYZsh{}\PYZsh{} Add company to my df}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{company\PYZus{}create}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek\PYZus{}create}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{company\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{company\PYZus{}active}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}   \PY{o}{=} \PY{n}{df\PYZus{}user}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek\PYZus{}active}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{company\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}20}]:} \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{company\PYZus{}create}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{company\PYZus{}active}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Ncompany}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_26_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}21}]:} \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}create}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}active}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Nuser}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_27_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    The above plots shows the creation and activation of new user is both
+increasing
+
+    \hypertarget{for-on-vacation-hypothesis-we-need-to-merge-dfs}{%
+\subsubsection{For on vacation hypothesis, we need to merge
+DFs}\label{for-on-vacation-hypothesis-we-need-to-merge-dfs}}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}22}]:} \PY{n}{merge\PYZus{}event} \PY{o}{=} \PY{n}{df\PYZus{}event}\PY{o}{.}\PY{n}{merge}\PY{p}{(}\PY{n}{df\PYZus{}user}\PY{p}{,} \PY{n}{on}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}id}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{how} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{inner}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         \PY{n}{merge\PYZus{}event} \PY{o}{=} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{event\PYZus{}name} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{login}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{]}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}23}]:} \PY{n}{merge\PYZus{}email} \PY{o}{=} \PY{n}{df\PYZus{}email}\PY{o}{.}\PY{n}{merge}\PY{p}{(}\PY{n}{df\PYZus{}user}\PY{p}{,} \PY{n}{on}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}id}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,} \PY{n}{how} \PY{o}{=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{inner}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}24}]:} \PY{c+c1}{\PYZsh{}merge\PYZus{}event.tail()}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}25}]:} \PY{c+c1}{\PYZsh{}merge\PYZus{}email.tail()}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}26}]:} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{location}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{argmax}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+{\color{outcolor}Out[{\color{outcolor}26}]:} 'United States'
+\end{Verbatim}
+            
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}27}]:} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{location} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{United States}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{in US}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{location} \PY{o}{!=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{United States}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{out US}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_35_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}28}]:} \PY{n}{merge\PYZus{}email}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}email}\PY{o}{.}\PY{n}{language} \PY{o}{==} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{english}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{merge\PYZus{}email}\PY{o}{.}\PY{n}{action} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{email\PYZus{}clickthrough}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{english}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{merge\PYZus{}email}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}email}\PY{o}{.}\PY{n}{language} \PY{o}{!=} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{english}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{o}{\PYZam{}} \PY{p}{(}\PY{n}{merge\PYZus{}email}\PY{o}{.}\PY{n}{action} \PY{o}{==} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{email\PYZus{}clickthrough}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{non\PYZhy{}english}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_36_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    language makes no difference
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}29}]:} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user 1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{2}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user 2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{3}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user 3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_38_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    user type seems to make a difference; type 1 and 2 are more inactive
+than type 3
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}30}]:} \PY{n}{merge\PYZus{}event}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{hasphone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]} \PY{o}{=} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{device}\PY{o}{.}\PY{n}{str}\PY{o}{.}\PY{n}{contains}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{phone}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}31}]:} \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}1phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{=} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZam{}} 
+                                               \PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{hasphone} \PY{o}{==} \PY{k+kc}{True}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}1nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{=} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{1}\PY{p}{)} \PY{o}{\PYZam{}} 
+                                               \PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{hasphone} \PY{o}{==} \PY{k+kc}{False}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}2phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{=} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{2}\PY{p}{)} \PY{o}{\PYZam{}} 
+                                               \PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{hasphone} \PY{o}{==} \PY{k+kc}{True}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}2nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{=} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{2}\PY{p}{)} \PY{o}{\PYZam{}} 
+                                               \PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{hasphone} \PY{o}{==} \PY{k+kc}{False}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}3phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{=} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{3}\PY{p}{)} \PY{o}{\PYZam{}} 
+                                               \PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{hasphone} \PY{o}{==} \PY{k+kc}{True}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+         \PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}3nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{=} \PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{loc}\PY{p}{[}\PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{user\PYZus{}type} \PY{o}{==} \PY{l+m+mi}{3}\PY{p}{)} \PY{o}{\PYZam{}} 
+                                               \PY{p}{(}\PY{n}{merge\PYZus{}event}\PY{o}{.}\PY{n}{hasphone} \PY{o}{==} \PY{k+kc}{False}\PY{p}{)}\PY{p}{]}\PY{o}{.}\PY{n}{groupby}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{nweek}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{user\PYZus{}id}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{o}{.}\PY{n}{nunique}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}32}]:} \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}1phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{/}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}1nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}2phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{/}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}2nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}3phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{o}{/}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}3nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{phone/no phone login}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_42_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}33}]:} \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}1phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}2phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}3phone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{phone login}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_43_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}34}]:} \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}1nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user1}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}2nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user2}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{p}{(}\PY{n}{my\PYZus{}df}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user\PYZus{}3nophone}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{o}{.}\PY{n}{plot}\PY{p}{(}\PY{n}{label}\PY{o}{=}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{user3}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{not phone login}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{p}{)}
+         \PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+
+
+    \begin{center}
+    \adjustimage{max size={0.9\linewidth}{0.9\paperheight}}{output_44_0.png}
+    \end{center}
+    { \hspace*{\fill} \\}
+    
+    \begin{Verbatim}[commandchars=\\\{\}]
+{\color{incolor}In [{\color{incolor}35}]:} \PY{c+c1}{\PYZsh{} temp = my\PYZus{}df.pct\PYZus{}change()}
+         \PY{c+c1}{\PYZsh{} (temp[\PYZdq{}user\PYZus{}1phone\PYZdq{}]/temp[\PYZdq{}user\PYZus{}1nophone\PYZdq{}]).plot(label=\PYZdq{}user1\PYZdq{})}
+         \PY{c+c1}{\PYZsh{} (temp[\PYZdq{}user\PYZus{}2phone\PYZdq{}]/temp[\PYZdq{}user\PYZus{}2nophone\PYZdq{}]).plot(label=\PYZdq{}user2\PYZdq{})}
+         \PY{c+c1}{\PYZsh{} (temp[\PYZdq{}user\PYZus{}3phone\PYZdq{}]/temp[\PYZdq{}user\PYZus{}3nophone\PYZdq{}]).plot(label=\PYZdq{}user3\PYZdq{})}
+         \PY{c+c1}{\PYZsh{} plt.ylabel(\PYZdq{}phone/no phone login\PYZdq{})}
+         \PY{c+c1}{\PYZsh{} plt.legend()}
+         \PY{c+c1}{\PYZsh{} plt.show()}
+\end{Verbatim}
+
+
+    This plot is very juicy.
+
+People using phones tends to drop at higher rate than people not using
+phones in the same period.
+
+This supports the vacation hypothesis.
+
+    \hypertarget{summary}{%
+\section{Summary}\label{summary}}
+
+Overall, there is no significant drop of using. The new users are
+increasing. The email opening are also increasing.
+
+The login rate drop could come from people going on vacation. It is also
+user type dependent.
+
+    \hypertarget{future}{%
+\section{Future}\label{future}}
+
+The phone user hypothesis could be tested better.
+
 
     % Add a bibliography block to the postdoc
     
