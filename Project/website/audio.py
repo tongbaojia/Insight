@@ -190,7 +190,8 @@ def mytext(name=None):
     ## audio_length = "%.1f sec" % infodic[myaudio]["duration"]
 
     audio_length = "%.1f sec" % atime
-    return render_template("index_summary.html", output_text=keytext, output_sentence=sentence, original_text=outtext, audio_length=audio_length, tmpfiles=tmpfiles)
+    return render_template("index_summary.html", output_text=keytext, output_sentence=sentence, original_text=outtext,
+                           audio_length=audio_length, tmpfiles=tmpfiles)
 
 if __name__ == '__main__':
     #socketio.run(app, debug=True, host='0.0.0.0')
